@@ -1,0 +1,3407 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>RobCoach — Scheda & Percorso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --surface: #18181d;
+      --surface-hover: #1f1f26;
+      --border: #2f2f41;
+      --text: #e8e8ed;
+      --text-muted: #8888a0;
+      --accent: #22c55e;
+      --accent-dim: #16a34a;
+      --accent-soft: rgba(34,197,94,.15);
+      --orange: #f97316;
+      --orange-soft: rgba(249,115,22,.15);
+      --blue: #3b82f6;
+      --blue-soft: rgba(59,130,246,.15);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --font: 'DM Sans',-apple-system,sans-serif;
+      --font-head: 'Outfit',-apple-system,sans-serif;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5}
+    .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+    @media(max-width:768px){.app{grid-template-columns:1fr}.sidebar{display:none}.nav-mobile{display:flex!important}}
+
+    /* Sidebar */
+    .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:1.5rem 0;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+    .logo{font-family:var(--font-head);font-weight:700;font-size:1.25rem;padding:0 1.25rem 1.5rem;border-bottom:1px solid var(--border);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+    .logo span{color:var(--accent)}
+    .nav a{display:flex;align-items:center;gap:.75rem;padding:.75rem 1.25rem;color:var(--text-muted);text-decoration:none;font-weight:500;transition:color .2s,background .2s}
+    .nav a:hover{color:var(--text);background:var(--surface-hover)}
+    .nav a.active{color:var(--accent);background:var(--accent-soft)}
+    .nav svg{flex-shrink:0;opacity:.9}
+    .current-user-wrap{padding:1rem 1.25rem;margin-top:auto;border-top:1px solid var(--border);font-size:.875rem;color:var(--text-muted)}
+    .current-user-wrap strong{color:var(--text)}
+    .db-badge{font-size:.7rem;color:var(--text-muted);margin-top:.4rem;display:flex;align-items:center;gap:.35rem}
+    .db-badge::before{content:'';width:6px;height:6px;background:var(--accent);border-radius:50%}
+
+    /* Mobile nav */
+    .nav-mobile{display:none;padding:.75rem 1rem;gap:.5rem;overflow-x:auto;background:var(--surface);border-bottom:1px solid var(--border)}
+    .nav-mobile a{flex-shrink:0;padding:.5rem .75rem;border-radius:var(--radius-sm);background:var(--surface-hover);color:var(--text-muted);text-decoration:none;font-size:.875rem;font-weight:500}
+    .nav-mobile a.active{background:var(--accent-soft);color:var(--accent)}
+
+    /* Main */
+    .main{padding:2rem;max-width:960px;margin:0 auto;width:100%}
+    .main h1{font-family:var(--font-head);font-size:1.75rem;font-weight:700;margin-bottom:.5rem}
+    .main .sub{color:var(--text-muted);font-size:.95rem;margin-bottom:1.5rem}
+    .panel{display:none;animation:fade .25s ease}
+    .panel.active{display:block}
+    @keyframes fade{from{opacity:0}to{opacity:1}}
+
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem}
+    .card h2{font-family:var(--font-head);font-size:1.1rem;font-weight:600;margin-bottom:1rem;color:var(--text)}
+    label{display:block;font-size:.875rem;font-weight:500;color:var(--text-muted);margin-bottom:.35rem}
+    input,select,textarea{width:100%;padding:.65rem .85rem;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-family:inherit;font-size:.95rem;margin-bottom:1rem}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+    textarea{min-height:100px;resize:vertical}
+    .row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:1rem}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.65rem 1.25rem;border-radius:var(--radius-sm);font-family:inherit;font-weight:600;font-size:.9rem;cursor:pointer;border:none;transition:background .2s,transform .1s}
+    .btn:active{transform:scale(.98)}
+    .btn-primary{background:var(--accent);color:#0a0a0c}
+    .btn-primary:hover{background:var(--accent-dim)}
+    .btn-secondary{background:var(--surface-hover);color:var(--text);border:1px solid var(--border)}
+    .btn-secondary:hover{background:var(--border)}
+    .btn-small{padding:.4rem .75rem;font-size:.8rem}
+    .btn-blue{background:var(--blue-soft);color:var(--blue);border:1px solid var(--blue)}
+    .mt{margin-top:1rem}
+    .flex-gap{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center}
+
+    /* Users */
+    .user-list{list-style:none}
+    .user-list li{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:var(--bg);border-radius:var(--radius-sm);margin-bottom:.5rem;border:1px solid var(--border)}
+    .user-list li.current{border-color:var(--accent);background:var(--accent-soft)}
+    .user-list .name{font-weight:600}
+    .user-list .actions{display:flex;gap:.5rem}
+    .user-list button{background:none;border:none;color:var(--text-muted);cursor:pointer;padding:.25rem}
+    .user-list button:hover{color:var(--orange)}
+    .empty-state{text-align:center;padding:2rem;color:var(--text-muted);font-size:.95rem}
+    .add-user-form .row{grid-template-columns:1fr auto;align-items:end}
+    .add-user-form input{margin-bottom:0}
+
+    /* Progress table */
+    .progress-table{width:100%;border-collapse:collapse;font-size:.9rem}
+    .progress-table th,.progress-table td{padding:.6rem .75rem;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}
+    .progress-table th{color:var(--text-muted);font-weight:500;font-size:.8rem;text-transform:uppercase}
+    .progress-table tr:hover td{background:var(--surface-hover)}
+    .progress-table .del-cell{width:40px}
+    .progress-table button{background:none;border:none;color:var(--text-muted);cursor:pointer;padding:.25rem}
+    .progress-table button:hover{color:#ef4444}
+    #progress-list-wrap{overflow-x:auto}
+
+    /* Export */
+    .export-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;font-size:.85rem;font-family:ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;max-height:400px;overflow-y:auto;margin-top:1rem;color:var(--text-muted)}
+    .export-box.highlight{border-color:var(--accent);color:var(--text)}
+    .copy-hint{font-size:.8rem;color:var(--accent);margin-top:.5rem}
+
+    /* Diet — per-meal layout */
+    .meal-row{margin-bottom:1rem}
+    .meal-row label{font-size:.8rem;text-transform:uppercase;letter-spacing:.03em}
+    .meal-item{display:flex;flex-direction:column;gap:.25rem}
+    .meal-item label{font-size:.8rem;color:var(--text-muted);margin-bottom:.25rem}
+    .meal-item input{margin-bottom:0}
+    .diet-meal-grid{display:flex;flex-direction:column;gap:.5rem}
+    .diet-meal-row{display:grid;grid-template-columns:80px 1fr 1fr;gap:.75rem;align-items:center;padding:.6rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);transition:border-color .15s}
+    .diet-meal-row:hover{border-color:var(--accent)}
+    .diet-meal-label{font-size:.8rem;font-weight:700;color:var(--text);white-space:nowrap}
+    .diet-meal-cell{display:flex;flex-direction:column;gap:.2rem}
+    .diet-meal-cell .cell-head{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);display:flex;align-items:center;gap:.3rem}
+    .diet-meal-cell .cell-head .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+    .dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0}
+    .dot-carbs{background:#eab308}
+    .dot-proteins{background:var(--accent)}
+    details.card summary{outline:none}
+    details.card summary svg{transition:transform .2s}
+    details.card[open] summary svg{transform:rotate(180deg)}
+    .diet-meal-cell input{margin-bottom:0;font-size:.88rem;padding:.5rem .65rem}
+    .diet-fats-row{display:grid;grid-template-columns:80px 1fr;gap:.75rem;align-items:center;padding:.6rem .75rem;background:var(--bg);border:1px solid rgba(249,115,22,.3);border-radius:var(--radius-sm)}
+    .diet-fats-row .diet-meal-label{color:var(--orange)}
+    .diet-fats-row input{margin-bottom:0;font-size:.88rem;padding:.5rem .65rem}
+    .diet-col-heads{display:grid;grid-template-columns:80px 1fr 1fr;gap:.75rem;padding:0 .75rem;margin-bottom:.25rem}
+    .diet-col-heads span{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);display:flex;align-items:center;gap:.3rem}
+    @media(max-width:540px){
+      .diet-meal-row{grid-template-columns:60px 1fr 1fr}
+      .diet-col-heads{grid-template-columns:60px 1fr 1fr}
+    }
+
+    /* Workout tabs */
+    .scheda-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.25rem}
+    .scheda-tab{padding:.45rem 1rem;border-radius:var(--radius-sm);font-size:.875rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface-hover);color:var(--text-muted);transition:all .2s;font-family:inherit}
+    .scheda-tab.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+    .scheda-tab.new-tab{border-style:dashed;color:var(--text-muted)}
+    .workout-days{display:grid;gap:1.25rem}
+    .workout-day-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;border-left:3px solid var(--accent)}
+    .workout-day-card h3{font-family:var(--font-head);font-size:.95rem;font-weight:600;margin-bottom:.5rem;color:var(--text)}
+    .workout-day-card .day-name{margin-bottom:.75rem}
+    .workout-day-card .day-name input{font-weight:500;margin-bottom:0}
+    .workout-ex-table{width:100%;border-collapse:collapse;font-size:.9rem;margin-bottom:.5rem}
+    .workout-ex-table th,.workout-ex-table td{padding:.5rem .4rem;text-align:left;border-bottom:1px solid var(--border);vertical-align:middle}
+    .workout-ex-table th{color:var(--text-muted);font-weight:500;font-size:.75rem;text-transform:uppercase}
+    .workout-ex-table input{width:100%;padding:.45rem .5rem;margin-bottom:0;font-size:.85rem}
+    .col-exercise{min-width:140px}.col-weight{width:70px}.col-sets{width:55px}.col-reps{width:70px}.col-alt{min-width:120px}.col-del{width:36px;text-align:center}
+    .btn-del-row{background:none;border:none;color:var(--text-muted);cursor:pointer;padding:.25rem;font-size:1rem;line-height:1}
+    .btn-del-row:hover{color:#ef4444}
+    .workout-day-card .add-ex-btn{margin-top:.5rem}
+    .import-area{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:1.25rem;text-align:center;color:var(--text-muted);font-size:.9rem;cursor:pointer;transition:border-color .2s}
+    .import-area:hover,.import-area.drag{border-color:var(--accent);color:var(--text)}
+    .import-area input[type=file]{display:none}
+
+    /* Workout preview */
+    .workout-preview{margin-top:1.5rem}
+    .workout-preview .card{border-left:3px solid var(--accent)}
+    .workout-preview-day{background:var(--bg);border-radius:var(--radius-sm);padding:1rem 1.25rem;margin-bottom:.75rem;border:1px solid var(--border)}
+    .workout-preview-day:last-child{margin-bottom:0}
+    .workout-preview-day h4{font-family:var(--font-head);font-size:.95rem;font-weight:600;color:var(--accent);margin-bottom:.5rem}
+    .workout-preview-day .exercises{font-size:.9rem;color:var(--text-muted)}
+    .workout-preview-day table{width:100%;font-size:.85rem;border-collapse:collapse}
+    .workout-preview-day table th,.workout-preview-day table td{padding:.4rem .5rem;border-bottom:1px solid var(--border);text-align:left}
+    .workout-preview-day table th{color:var(--text-muted);font-weight:500}
+    .workout-preview-empty{color:var(--text-muted);font-size:.9rem;padding:1rem 0}
+
+    /* Coach */
+    .coach-block{display:none}
+    .coach-block.active{display:block}
+    .coach-intro{color:var(--text-muted);margin-bottom:1.25rem;font-size:.95rem;line-height:1.5}
+    .coach-form .meal-row{margin-bottom:1rem}
+    .coach-form textarea{min-height:80px}
+    .coach-section{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem}
+    .coach-section-title{font-family:var(--font-head);font-size:.9rem;font-weight:600;color:var(--accent);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;text-transform:uppercase;letter-spacing:.04em}
+    .coach-steps-header{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+    .coach-step-pill{padding:.35rem .85rem;border-radius:20px;font-size:.8rem;font-weight:600;background:var(--bg);border:1px solid var(--border);color:var(--text-muted)}
+    .coach-step-pill.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+    .coach-step-arrow{color:var(--text-muted);font-size:.9rem}
+    .coach-next-hint{margin-top:1rem;background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:.85rem;color:var(--text);display:flex;align-items:flex-start;gap:.5rem;line-height:1.5}
+    .coach-next-hint svg{flex-shrink:0;color:var(--accent);margin-top:.1rem}
+    .muscle-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.5rem}
+    .muscle-item{display:flex;flex-direction:column;gap:.25rem}
+    .muscle-item span{font-size:.8rem;color:var(--text-muted);font-weight:500}
+    .muscle-item select{margin-bottom:0;font-size:.82rem;padding:.45rem .6rem}
+    .slider-row{display:flex;align-items:center;gap:.75rem}
+    .slider{flex:1;accent-color:var(--accent);margin-bottom:0;padding:0;height:6px;border:none;background:transparent}
+    .slider-val{font-weight:700;color:var(--accent);font-size:.95rem;min-width:20px;text-align:center}
+    .strength-row{display:grid;grid-template-columns:1fr 80px 40px;gap:.5rem;align-items:center}
+    .strength-row input{margin-bottom:0;font-size:.85rem}
+    .strength-row button{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem;padding:.3rem}
+    .strength-row button:hover{color:#ef4444}
+    .strength-day-header{display:flex;align-items:center;gap:.6rem;margin-top:.9rem;margin-bottom:.2rem}
+    .strength-day-header:first-child{margin-top:.1rem}
+    .strength-day-header span{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);white-space:nowrap}
+    .strength-day-header::after{content:'';flex:1;height:1px;background:var(--border)}
+    .ai-spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--accent-soft);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin-right:.4rem;vertical-align:middle}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .ai-status{font-size:.85rem;color:var(--text-muted);margin-top:.75rem;display:flex;align-items:center;gap:.5rem}
+    .ai-status.ok{color:var(--accent)}
+    .ai-status.err{color:#ef4444}
+
+    /* Photo upload */
+    .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem}
+    .photo-cell{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:1rem;text-align:center;cursor:pointer;transition:border-color .2s;position:relative;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem}
+    .photo-cell:hover{border-color:var(--accent)}
+    .photo-cell input{display:none}
+    .photo-cell img{max-width:100%;max-height:100px;border-radius:4px;object-fit:cover}
+    .photo-cell .ph-label{font-size:.8rem;color:var(--text-muted);font-weight:500}
+    .photo-cell .ph-remove{position:absolute;top:4px;right:4px;background:rgba(239,68,68,.8);color:#fff;border:none;border-radius:4px;padding:2px 5px;cursor:pointer;font-size:.75rem;display:none}
+    .photo-cell:hover .ph-remove{display:block}
+
+    /* Progress form expanded */
+    .progress-chart-stats-item{display:flex;flex-direction:column;gap:.15rem}
+    /* Storico progressi */
+    #progress-list-wrap{overflow-x:auto}
+    /* Chart range buttons */
+    .chart-range-btn.active{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+
+    /* Settings */
+    .settings-hint{font-size:.85rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5}
+    .provider-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.75rem;margin-top:.75rem}
+    .provider-card{border:1.5px solid var(--border);border-radius:12px;padding:.85rem .9rem;display:flex;flex-direction:column;gap:.3rem;background:var(--bg);opacity:.75;cursor:default}
+    .prov-icon{width:32px;height:32px;border-radius:8px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;margin-bottom:.2rem}
+    .prov-name{font-size:.85rem;font-weight:600;color:var(--text)}
+    .prov-note{font-size:.72rem;color:var(--text-muted)}
+    .prov-badge{font-size:.68rem;font-weight:600;padding:.15rem .45rem;border-radius:6px;display:inline-block;width:fit-content}
+    .prov-badge.free{background:rgba(16,185,129,.15);color:#10b981}
+    .prov-badge.local{background:rgba(99,102,241,.15);color:#818cf8}
+    .prov-badge.paid{background:rgba(245,158,11,.15);color:#f59e0b}
+    .api-key-row{display:flex;gap:.75rem;align-items:end}
+    .api-key-row input{flex:1;margin-bottom:0}
+    .api-key-status{font-size:.8rem;margin-top:.5rem}
+    .api-key-status.ok{color:var(--accent)}.api-key-status.err{color:#ef4444}
+
+    /* AI Provider selector — UI only, ready for future impl */
+
+    /* Hevy list items */
+    .hevy-item{display:flex;align-items:center;gap:.75rem;padding:.6rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:border-color .2s}
+    .hevy-item:hover{border-color:var(--accent)}
+    .hevy-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+    .hevy-item-name{font-weight:500;font-size:.9rem}
+    .hevy-item-meta{font-size:.75rem;color:var(--text-muted)}
+    .import-tab-btn.active{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+    .settings-coming-soon{font-size:.72rem;padding:.2rem .6rem;border-radius:10px;background:rgba(249,115,22,.15);color:var(--orange);font-weight:600;letter-spacing:.03em}
+
+    /* Welcome / Setup modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem;animation:fade .2s ease}
+    .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:520px;padding:2rem;position:relative;max-height:90vh;overflow-y:auto}
+    .modal-box h2{font-family:var(--font-head);font-size:1.4rem;font-weight:700;margin-bottom:.5rem}
+    .modal-box .sub{color:var(--text-muted);font-size:.9rem;margin-bottom:1.5rem;line-height:1.5}
+    .setup-steps{display:flex;flex-direction:column;gap:1rem;margin-bottom:1.5rem}
+    .setup-step{display:flex;gap:1rem;align-items:flex-start}
+    .step-num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#0a0a0c;font-weight:700;font-size:.85rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:.1rem}
+    .step-body{flex:1}
+    .step-body strong{display:block;font-size:.95rem;margin-bottom:.25rem}
+    .step-body p{font-size:.85rem;color:var(--text-muted);line-height:1.4;margin-bottom:.5rem}
+    .step-body a{color:var(--accent);text-decoration:none;font-weight:500}
+    .step-body a:hover{text-decoration:underline}
+    .step-body input{margin-bottom:.35rem}
+    .modal-footer{display:flex;gap:.75rem;flex-wrap:wrap}
+    .setup-check{display:flex;align-items:center;gap:.4rem;font-size:.8rem;margin-top:.4rem}
+    .setup-check svg{color:var(--accent)}
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">Rob<span>Coach</span></div>
+    <nav class="nav">
+      <a href="#" data-panel="users" class="active">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Utenti
+      </a>
+      <a href="#" data-panel="profile">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        Il mio profilo
+      </a>
+      <a href="#" data-panel="diet">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        La mia dieta
+      </a>
+      <a href="#" data-panel="workout">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="4" height="10" rx="1"/><rect x="18" y="7" width="4" height="10" rx="1"/><path d="M6 10h12"/><path d="M6 14h12"/></svg>
+        La mia scheda
+      </a>
+      <a href="#" data-panel="coach">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18"/><path d="m8 7 4-4 4 4"/><path d="m8 17 4 4 4-4"/><path d="M3 12h3"/><path d="M18 12h3"/></svg>
+        Genera / Aggiorna scheda
+      </a>
+      <a href="#" data-panel="progress">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        I miei progressi
+      </a>
+      <a href="#" data-panel="export">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Copia per il PT
+      </a>
+      <a href="#" data-panel="settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Impostazioni
+      </a>
+    </nav>
+    <div class="current-user-wrap">
+      Utente: <strong id="current-user-name">—</strong>
+      <div class="db-badge">Dati in locale (IndexedDB)</div>
+    </div>
+  </aside>
+
+  <div class="nav-mobile">
+    <a href="#" data-panel="users" class="active">Utenti</a>
+    <a href="#" data-panel="profile">Profilo</a>
+    <a href="#" data-panel="diet">Dieta</a>
+    <a href="#" data-panel="workout">Scheda</a>
+    <a href="#" data-panel="coach">AI Coach</a>
+    <a href="#" data-panel="progress">Progressi</a>
+    <a href="#" data-panel="export">Copia PT</a>
+    <a href="#" data-panel="settings">⚙</a>
+  </div>
+
+  <main class="main">
+
+    <!-- UTENTI -->
+    <section id="panel-users" class="panel active">
+      <h1>Utenti</h1>
+      <p class="sub">Ogni utente ha schede, dieta e progressi separati.</p>
+      <div class="card">
+        <h2>Nuovo utente</h2>
+        <form id="form-add-user" class="add-user-form">
+          <div class="row">
+            <div><label for="new-user-name">Nome</label><input type="text" id="new-user-name" placeholder="es. Roberto" required /></div>
+            <div><label>&nbsp;</label><button type="submit" class="btn btn-primary">Aggiungi</button></div>
+          </div>
+        </form>
+      </div>
+      <div class="card">
+        <h2>Elenco</h2>
+        <ul id="user-list" class="user-list"></ul>
+        <div id="user-list-empty" class="empty-state">Nessun utente.</div>
+      </div>
+    </section>
+
+    <!-- PROFILO -->
+    <section id="panel-profile" class="panel">
+      <h1>Il mio profilo</h1>
+      <p class="sub">Dati anagrafici e livello per le analisi AI.</p>
+      <form id="form-profile" class="card">
+        <h2>Dati attuali</h2>
+        <div class="row">
+          <div><label for="profile-sex">Sesso</label><select id="profile-sex"><option value="">—</option><option value="M">Uomo</option><option value="F">Donna</option></select></div>
+          <div><label for="profile-age">Età</label><input type="number" id="profile-age" min="10" max="120" placeholder="anni" /></div>
+          <div><label for="profile-height">Altezza (cm)</label><input type="number" id="profile-height" min="100" max="250" /></div>
+          <div><label for="profile-weight">Peso attuale (kg)</label><input type="number" id="profile-weight" step="0.1" min="30" /></div>
+          <div><label for="profile-weight-prev">Peso prec. (kg)</label><input type="number" id="profile-weight-prev" step="0.1" min="30" /></div>
+          <div><label for="profile-waist">Vita (cm)</label><input type="number" id="profile-waist" min="40" max="200" /></div>
+        </div>
+        <div class="row">
+          <div><label for="profile-level">Livello</label><select id="profile-level"><option value="">—</option><option value="principiante">Principiante</option><option value="intermedio">Intermedio</option><option value="avanzato">Avanzato</option></select></div>
+          <div><label for="profile-days-weights">Giorni pesi/sett.</label><input type="number" id="profile-days-weights" min="0" max="7" placeholder="4" /></div>
+          <div><label for="profile-days-cardio">Giorni cardio/sett.</label><input type="number" id="profile-days-cardio" min="0" max="7" placeholder="2" /></div>
+        </div>
+        <button type="submit" class="btn btn-primary mt">Salva profilo</button>
+      </form>
+    </section>
+
+    <!-- DIETA -->
+    <section id="panel-diet" class="panel">
+      <h1>La mia dieta</h1>
+      <p class="sub">Giornata tipo pasto per pasto. Puoi compilare manualmente o importare la risposta dell'AI.</p>
+
+      <!-- Version tabs + actions -->
+      <div class="card" style="padding-bottom:.75rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem">
+          <h2 style="margin:0">Versioni dieta</h2>
+          <div class="flex-gap">
+            <button type="button" id="btn-new-dieta" class="btn btn-secondary btn-small">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nuova versione
+            </button>
+            <button type="button" id="btn-del-dieta" class="btn btn-danger btn-small" style="display:none">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+              Elimina
+            </button>
+          </div>
+        </div>
+        <div id="dieta-tabs" class="scheda-tabs"></div>
+      </div>
+
+      <!-- Meal-by-meal form -->
+      <form id="form-diet" class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:1.1rem">
+          <h2 style="margin:0">Giornata tipo</h2>
+          <div style="display:flex;gap:.5rem;align-items:center;font-size:.78rem;color:var(--text-muted)">
+            <span style="display:flex;align-items:center;gap:.3rem"><span class="dot dot-carbs"></span>Carboidrati</span>
+            <span style="display:flex;align-items:center;gap:.3rem"><span class="dot dot-proteins"></span>Proteine</span>
+          </div>
+        </div>
+
+        <!-- Column headers -->
+        <div class="diet-col-heads">
+          <span></span>
+          <span><span class="dot dot-carbs"></span>Carboidrati</span>
+          <span><span class="dot dot-proteins"></span>Proteine</span>
+        </div>
+
+        <div class="diet-meal-grid">
+          <!-- Colazione -->
+          <div class="diet-meal-row">
+            <div class="diet-meal-label">🌅 Colazione</div>
+            <div class="diet-meal-cell">
+              <input type="text" id="diet-carbs-colazione" placeholder="es. 80g avena, 1 banana" />
+            </div>
+            <div class="diet-meal-cell">
+              <input type="text" id="diet-proteins-colazione" placeholder="es. 2 uova, 50g ricotta" />
+            </div>
+          </div>
+
+          <!-- Spuntino 1 -->
+          <div class="diet-meal-row">
+            <div class="diet-meal-label">🍎 Spuntino 1</div>
+            <div class="diet-meal-cell">
+              <input type="text" id="diet-carbs-spuntino1" placeholder="es. 1 mela" />
+            </div>
+            <div class="diet-meal-cell">
+              <input type="text" id="diet-proteins-spuntino1" placeholder="es. 30g mandorle" />
+            </div>
+          </div>
+
+          <!-- Pranzo -->
+          <div class="diet-meal-row">
+            <div class="diet-meal-label">☀️ Pranzo</div>
+            <div class="diet-meal-cell">
+              <input type="text" id="diet-carbs-pranzo" placeholder="es. 100g pasta" />
+            </div>
+            <div class="diet-meal-cell">
+              <input type="text" id="diet-proteins-pranzo" placeholder="es. 150g pollo" />
+            </div>
+          </div>
+
+          <!-- Spuntino 2 -->
+          <div class="diet-meal-row">
+            <div class="diet-meal-label">🥜 Spuntino 2</div>
+            <div class="diet-meal-cell">
+              <input type="text" id="diet-carbs-spuntino2" placeholder="es. 200g yogurt" />
+            </div>
+            <div class="diet-meal-cell">
+              <input type="text" id="diet-proteins-spuntino2" placeholder="es. yogurt greco" />
+            </div>
+          </div>
+
+          <!-- Cena -->
+          <div class="diet-meal-row">
+            <div class="diet-meal-label">🌙 Cena</div>
+            <div class="diet-meal-cell">
+              <input type="text" id="diet-carbs-cena" placeholder="es. 80g riso" />
+            </div>
+            <div class="diet-meal-cell">
+              <input type="text" id="diet-proteins-cena" placeholder="es. 200g pesce" />
+            </div>
+          </div>
+
+          <!-- Extra carbs/proteins -->
+          <div class="diet-meal-row">
+            <div class="diet-meal-label">➕ Extra</div>
+            <div class="diet-meal-cell">
+              <input type="text" id="diet-carbs-extra" placeholder="es. biscotto, birra" />
+            </div>
+            <div class="diet-meal-cell">
+              <input type="text" id="diet-proteins-extra" placeholder="opzionale" />
+            </div>
+          </div>
+
+          <!-- Fats / condiments -->
+          <div class="diet-fats-row" style="margin-top:.25rem">
+            <div class="diet-meal-label" style="display:flex;align-items:center;gap:.4rem">
+              <span style="width:7px;height:7px;border-radius:50%;background:var(--orange);display:inline-block;flex-shrink:0"></span>
+              Grassi
+            </div>
+            <input type="text" id="diet-extra-liberta" placeholder="es. 2 cucchiai olio EVO, burro, dolce il weekend, caffè con zucchero..." style="grid-column:2/-1" />
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt">Salva dieta</button>
+      </form>
+
+      <!-- Import from AI — collapsed by default -->
+      <details class="card" style="cursor:default">
+        <summary style="cursor:pointer;display:flex;align-items:center;gap:.6rem;list-style:none;user-select:none;font-family:var(--font-head);font-weight:600;font-size:.95rem">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          Importa piano dieta da AI
+          <span style="font-size:.78rem;font-weight:400;color:var(--text-muted);margin-left:.25rem">Incolla la risposta di ChatGPT / Claude</span>
+        </summary>
+        <div style="margin-top:1rem">
+          <textarea id="diet-import-text" placeholder="Incolla qui la risposta dell'AI con il piano alimentare consigliato (testo libero o blocco JSON)..." style="min-height:120px;font-size:.85rem"></textarea>
+          <div class="flex-gap mt">
+            <button type="button" id="btn-import-diet" class="btn btn-primary btn-small">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Analizza e compila campi dieta
+            </button>
+          </div>
+          <div id="diet-import-status" class="ai-status" style="display:none"></div>
+        </div>
+      </details>
+
+    </section>
+
+    <!-- SCHEDA ALLENAMENTO -->
+    <section id="panel-workout" class="panel">
+      <h1>La mia scheda</h1>
+      <p class="sub">Ogni versione è una tab. Puoi importare da file di testo o screenshot — l'AI compila automaticamente la tabella.</p>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem">
+          <h2 style="margin:0">Versioni scheda</h2>
+          <button type="button" id="btn-new-scheda-version" class="btn btn-secondary btn-small">+ Nuova versione</button>
+        </div>
+        <div id="scheda-tabs" class="scheda-tabs"></div>
+
+        <!-- Import area -->
+        <div class="card" style="margin-bottom:1rem;background:var(--bg)">
+          <h2 style="font-size:.95rem;margin-bottom:.5rem">Importa scheda</h2>
+          <!-- Import tabs -->
+          <div class="import-tabs" style="display:flex;gap:.5rem;margin-bottom:.75rem">
+            <button type="button" class="btn btn-secondary btn-small import-tab-btn active" data-import-tab="file">Da file .txt</button>
+            <button type="button" class="btn btn-secondary btn-small import-tab-btn" data-import-tab="paste">Incolla testo</button>
+            <button type="button" class="btn btn-secondary btn-small import-tab-btn" data-import-tab="csv">Da CSV</button>
+            <button type="button" class="btn btn-secondary btn-small import-tab-btn" data-import-tab="hevy">Da Hevy</button>
+          </div>
+
+          <!-- File import -->
+          <div id="import-tab-file">
+            <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:.75rem">Carica un file <strong>.txt</strong> con la tua scheda. L'app legge il testo e compila automaticamente i blocchi (analisi locale, nessuna AI).</p>
+            <label class="import-area" id="import-drop-area" for="import-file-input">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>Trascina qui un file .txt, oppure clicca per selezionarlo</span>
+              <input type="file" id="import-file-input" accept=".txt" />
+            </label>
+            <div id="import-status" class="ai-status" style="display:none"></div>
+          </div>
+
+          <!-- Paste text import -->
+          <div id="import-tab-paste" style="display:none">
+            <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:.75rem">Incolla qui il testo della scheda (risposta da ChatGPT, testo copiato, screenshot trascritto...). L'app lo analizza localmente e compila i blocchi.</p>
+            <textarea id="import-paste-text" placeholder="Incolla qui il testo della scheda..." style="min-height:160px;font-size:.85rem"></textarea>
+            <button type="button" id="btn-import-paste" class="btn btn-primary btn-small mt">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Analizza e compila blocchi
+            </button>
+            <div id="import-paste-status" class="ai-status" style="display:none"></div>
+          </div>
+
+          <!-- CSV import -->
+          <div id="import-tab-csv" style="display:none">
+            <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:.75rem">
+              Carica un file <strong>.csv</strong> con colonne: <code style="background:var(--bg);padding:.1rem .35rem;border-radius:4px;font-size:.8rem">#, Gruppo, Esercizio, Serie, Ripetizioni, Recupero, Note</code>.<br>
+              Gli esercizi vengono raggruppati per <strong>Gruppo</strong> e distribuiti sulle giornate. Puoi anche scegliere di caricare tutto in una sola giornata.
+            </p>
+            <label class="import-area" id="csv-drop-area" for="csv-file-input">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>Trascina qui il file .csv, oppure clicca per selezionarlo</span>
+              <input type="file" id="csv-file-input" accept=".csv,text/csv" />
+            </label>
+            <div id="csv-preview" style="display:none;margin-top:.75rem">
+              <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-bottom:.75rem">
+                <span id="csv-preview-label" style="font-size:.85rem;color:var(--text-muted)"></span>
+                <div style="display:flex;align-items:center;gap:.5rem;margin-left:auto">
+                  <label style="font-size:.85rem;color:var(--text-muted);margin:0">Destinazione:</label>
+                  <select id="csv-target-day" style="margin-bottom:0;font-size:.85rem;padding:.4rem .6rem;width:auto">
+                    <option value="auto">Auto (per Gruppo → Giornata)</option>
+                    <option value="1">Giornata 1</option>
+                    <option value="2">Giornata 2</option>
+                    <option value="3">Giornata 3</option>
+                    <option value="4">Giornata 4</option>
+                  </select>
+                </div>
+              </div>
+              <div id="csv-preview-table" style="overflow-x:auto;max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm)"></div>
+              <button type="button" id="btn-csv-import" class="btn btn-primary btn-small mt">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                Importa nella scheda
+              </button>
+            </div>
+            <div id="csv-import-status" class="ai-status" style="display:none"></div>
+          </div>
+
+          <!-- Hevy import -->
+          <div id="import-tab-hevy" style="display:none">
+            <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:.75rem">Importa le tue <strong>Routine</strong> (schede programmate) o gli <strong>Allenamenti</strong> recenti da Hevy. Configura la tua API key Hevy in <span style="color:var(--accent);cursor:pointer" onclick="navigate('settings')">Impostazioni</span>.</p>
+            <div class="flex-gap" style="margin-bottom:.75rem">
+              <button type="button" id="btn-hevy-load-routines" class="btn btn-blue btn-small">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                Carica Routine Hevy
+              </button>
+              <button type="button" id="btn-hevy-load-workouts" class="btn btn-secondary btn-small">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Carica ultimi allenamenti
+              </button>
+            </div>
+            <div id="hevy-list" style="display:none">
+              <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.5rem">Seleziona cosa importare:</p>
+              <div id="hevy-list-items" style="display:flex;flex-direction:column;gap:.35rem;max-height:260px;overflow-y:auto"></div>
+              <button type="button" id="btn-hevy-import-selected" class="btn btn-primary btn-small mt">Importa selezionati</button>
+            </div>
+            <div id="hevy-import-status" class="ai-status" style="display:none"></div>
+          </div>
+        </div>
+
+        <!-- Day cards -->
+        <div class="workout-days">
+          <div class="workout-day-card" data-day="1">
+            <h3>Giorno 1</h3>
+            <div class="meal-item day-name"><label>Nome giornata</label><input type="text" id="workout-day1-name" placeholder="es. Petto e Tricipiti" /></div>
+            <table class="workout-ex-table"><thead><tr><th class="col-exercise">Esercizio</th><th class="col-weight">Peso (kg)</th><th class="col-sets">Serie</th><th class="col-reps">Rep</th><th class="col-alt">Alternativa</th><th class="col-del"></th></tr></thead><tbody id="workout-day1-tbody"></tbody></table>
+            <button type="button" class="btn btn-secondary btn-small add-exercise" data-day="1">+ Aggiungi esercizio</button>
+          </div>
+          <div class="workout-day-card" data-day="2">
+            <h3>Giorno 2</h3>
+            <div class="meal-item day-name"><label>Nome giornata</label><input type="text" id="workout-day2-name" placeholder="es. Dorso e Bicipiti" /></div>
+            <table class="workout-ex-table"><thead><tr><th class="col-exercise">Esercizio</th><th class="col-weight">Peso (kg)</th><th class="col-sets">Serie</th><th class="col-reps">Rep</th><th class="col-alt">Alternativa</th><th class="col-del"></th></tr></thead><tbody id="workout-day2-tbody"></tbody></table>
+            <button type="button" class="btn btn-secondary btn-small add-exercise" data-day="2">+ Aggiungi esercizio</button>
+          </div>
+          <div class="workout-day-card" data-day="3">
+            <h3>Giorno 3</h3>
+            <div class="meal-item day-name"><label>Nome giornata</label><input type="text" id="workout-day3-name" placeholder="es. Gambe" /></div>
+            <table class="workout-ex-table"><thead><tr><th class="col-exercise">Esercizio</th><th class="col-weight">Peso (kg)</th><th class="col-sets">Serie</th><th class="col-reps">Rep</th><th class="col-alt">Alternativa</th><th class="col-del"></th></tr></thead><tbody id="workout-day3-tbody"></tbody></table>
+            <button type="button" class="btn btn-secondary btn-small add-exercise" data-day="3">+ Aggiungi esercizio</button>
+          </div>
+          <div class="workout-day-card" data-day="4">
+            <h3>Giorno 4</h3>
+            <div class="meal-item day-name"><label>Nome giornata</label><input type="text" id="workout-day4-name" placeholder="es. Spalle + Addome" /></div>
+            <table class="workout-ex-table"><thead><tr><th class="col-exercise">Esercizio</th><th class="col-weight">Peso (kg)</th><th class="col-sets">Serie</th><th class="col-reps">Rep</th><th class="col-alt">Alternativa</th><th class="col-del"></th></tr></thead><tbody id="workout-day4-tbody"></tbody></table>
+            <button type="button" class="btn btn-secondary btn-small add-exercise" data-day="4">+ Aggiungi esercizio</button>
+          </div>
+        </div>
+        <p class="db-badge" style="margin-top:.75rem">Usa la colonna Alternativa per un esercizio sostitutivo in caso di problemi.</p>
+        <div class="flex-gap mt">
+          <button type="button" id="btn-save-workout" class="btn btn-primary">Salva scheda</button>
+          <button type="button" id="btn-delete-version" class="btn btn-secondary" style="color:#ef4444;border-color:#ef4444">Elimina questa versione</button>
+        </div>
+      </div>
+
+      <div class="card workout-preview">
+        <h2>Anteprima scheda attiva</h2>
+        <div id="workout-preview-content" class="workout-preview-empty">Aggiungi esercizi e salva per vedere l'anteprima.</div>
+      </div>
+    </section>
+
+    <!-- COACH -->
+    <section id="panel-coach" class="panel">
+      <h1>Prompt per il tuo Personal Trainer AI</h1>
+      <p class="sub">Compila i campi, genera il prompt completo e incollalo su ChatGPT, Claude o qualsiasi AI gratuita. Poi incolla la risposta nell'app per salvare la nuova scheda.</p>
+
+      <!-- Step 1: fill details -->
+      <div class="card">
+        <div class="coach-steps-header">
+          <div class="coach-step-pill active" data-step="1">1 · Compila</div>
+          <div class="coach-step-arrow">→</div>
+          <div class="coach-step-pill" data-step="2">2 · Copia prompt</div>
+          <div class="coach-step-arrow">→</div>
+          <div class="coach-step-pill" data-step="3">3 · Incolla risposta</div>
+        </div>
+      </div>
+
+      <!-- Block: no scheda -->
+      <div id="coach-no-scheda" class="coach-block card">
+        <h2>Prima scheda — cosa vuoi ottenere?</h2>
+        <p class="coach-intro">Compila i dettagli, poi copia il prompt generato e incollalo su ChatGPT / Claude.</p>
+        <div class="coach-form">
+          <div class="meal-row"><label for="coach-new-objective">Obiettivo principale</label><input type="text" id="coach-new-objective" placeholder="es. Aumentare massa, ridurre grasso addominale" /></div>
+          <div class="row">
+            <div><label for="coach-new-days">Giorni allenamento/sett.</label><input type="number" id="coach-new-days" min="2" max="6" value="4" /></div>
+          </div>
+          <div class="meal-row"><label for="coach-new-notes">Attrezzatura / limitazioni fisiche</label><textarea id="coach-new-notes" placeholder="es. Solo bilanciere e manubri, problema alla spalla destra..."></textarea></div>
+          <button type="button" id="btn-gen-new-prompt" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Genera prompt da copiare
+          </button>
+        </div>
+      </div>
+
+      <!-- Block: has scheda -->
+      <div id="coach-has-scheda" class="coach-block card">
+        <h2>Aggiorna scheda / Check progressi</h2>
+        <p class="coach-intro">Compila tutti i campi che riesci — più dati dai, più il prompt sarà preciso e la risposta dell'AI sarà quella di un vero PT professionista.</p>
+        <div class="coach-form">
+
+          <!-- Sezione: Stato fisico attuale -->
+          <div class="coach-section">
+            <div class="coach-section-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              Stato fisico attuale
+            </div>
+            <div class="row">
+              <div><label for="coach-update-weight">Peso attuale (kg)</label><input type="number" id="coach-update-weight" step="0.1" min="30" placeholder="es. 78.5" /></div>
+              <div><label for="coach-update-waist">Circonferenza vita (cm)</label><input type="number" id="coach-update-waist" step="0.5" min="40" placeholder="es. 85" /></div>
+              <div><label for="coach-update-weeks">Settimane su questa scheda</label><input type="number" id="coach-update-weeks" min="1" max="52" placeholder="es. 6" /></div>
+            </div>
+            <div class="row">
+              <div>
+                <label for="coach-update-energy">Livello energia medio (1–10)</label>
+                <div class="slider-row">
+                  <input type="range" id="coach-update-energy" min="1" max="10" value="6" class="slider" />
+                  <span id="coach-update-energy-val" class="slider-val">6</span>
+                </div>
+              </div>
+              <div>
+                <label for="coach-update-sleep">Qualità sonno media (1–10)</label>
+                <div class="slider-row">
+                  <input type="range" id="coach-update-sleep" min="1" max="10" value="7" class="slider" />
+                  <span id="coach-update-sleep-val" class="slider-val">7</span>
+                </div>
+              </div>
+              <div>
+                <label for="coach-update-stress">Stress settimanale (1–10)</label>
+                <div class="slider-row">
+                  <input type="range" id="coach-update-stress" min="1" max="10" value="5" class="slider" />
+                  <span id="coach-update-stress-val" class="slider-val">5</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sezione: Feedback allenamento -->
+          <div class="coach-section">
+            <div class="coach-section-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Feedback sull'allenamento
+            </div>
+            <div class="meal-row">
+              <label for="coach-update-feel">Come ti sei trovato con la scheda attuale? (difficoltà, punti forti, stanchezza, motivazione)</label>
+              <textarea id="coach-update-feel" placeholder="es. Petto e spalle vanno bene, sento poco le gambe, squat faticoso al 4° set, recupero di 90s è corto..."></textarea>
+            </div>
+            <div class="meal-row">
+              <label>Percezione dello sforzo per gruppo muscolare</label>
+              <div class="muscle-grid">
+                <div class="muscle-item"><span>Petto</span><select id="rir-petto"><option value="">—</option><option>Troppo leggero</option><option>Giusto</option><option>Pesante ma ok</option><option>Troppo pesante</option></select></div>
+                <div class="muscle-item"><span>Schiena</span><select id="rir-schiena"><option value="">—</option><option>Troppo leggero</option><option>Giusto</option><option>Pesante ma ok</option><option>Troppo pesante</option></select></div>
+                <div class="muscle-item"><span>Spalle</span><select id="rir-spalle"><option value="">—</option><option>Troppo leggero</option><option>Giusto</option><option>Pesante ma ok</option><option>Troppo pesante</option></select></div>
+                <div class="muscle-item"><span>Bicipiti</span><select id="rir-bicipiti"><option value="">—</option><option>Troppo leggero</option><option>Giusto</option><option>Pesante ma ok</option><option>Troppo pesante</option></select></div>
+                <div class="muscle-item"><span>Tricipiti</span><select id="rir-tricipiti"><option value="">—</option><option>Troppo leggero</option><option>Giusto</option><option>Pesante ma ok</option><option>Troppo pesante</option></select></div>
+                <div class="muscle-item"><span>Gambe/Quad</span><select id="rir-gambe"><option value="">—</option><option>Troppo leggero</option><option>Giusto</option><option>Pesante ma ok</option><option>Troppo pesante</option></select></div>
+                <div class="muscle-item"><span>Posteriori</span><select id="rir-posteriori"><option value="">—</option><option>Troppo leggero</option><option>Giusto</option><option>Pesante ma ok</option><option>Troppo pesante</option></select></div>
+                <div class="muscle-item"><span>Addome</span><select id="rir-addome"><option value="">—</option><option>Troppo leggero</option><option>Giusto</option><option>Pesante ma ok</option><option>Troppo pesante</option></select></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sezione: Progressi forza -->
+          <div class="coach-section">
+            <div class="coach-section-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              Progressi di forza (opzionale)
+            </div>
+            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.75rem">Aggiorna il peso attuale per ogni esercizio — l'AI confronterà i carichi con la scheda e aggiornerà la progressione.</p>
+            <div id="strength-progress-rows" style="display:flex;flex-direction:column;gap:.5rem"></div>
+            <div class="flex-gap mt">
+              <button type="button" id="btn-prefill-strength" class="btn btn-primary btn-small">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.89"/></svg>
+                Precompila dalla scheda
+              </button>
+              <button type="button" id="btn-add-strength-row" class="btn btn-secondary btn-small">+ Aggiungi riga</button>
+            </div>
+          </div>
+
+          <!-- Sezione: Infortuni e limitazioni -->
+          <div class="coach-section">
+            <div class="coach-section-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Infortuni, dolori e limitazioni
+            </div>
+            <div class="meal-row">
+              <label for="coach-update-injuries">Hai dolori articolari, infortuni o zone da evitare?</label>
+              <textarea id="coach-update-injuries" placeholder="es. Fastidio al ginocchio destro, spalla sinistra da tenere sotto controllo, lombalgia leggera..." style="min-height:60px"></textarea>
+            </div>
+          </div>
+
+          <!-- Sezione: Cosa vuoi cambiare -->
+          <div class="coach-section">
+            <div class="coach-section-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Richieste e priorità per la nuova scheda
+            </div>
+            <div class="meal-row">
+              <label for="coach-update-changes">Cosa vuoi cambiare, aggiungere o migliorare nella nuova scheda?</label>
+              <textarea id="coach-update-changes" placeholder="es. Più volume gambe, aggiungere giornata dedicata addome, togliere leg curl e mettere leg press, lavorare più sulla schiena..."></textarea>
+            </div>
+            <div class="row">
+              <div>
+                <label for="coach-update-split">Tipo di split preferito</label>
+                <select id="coach-update-split">
+                  <option value="">Decidi tu (consigliato)</option>
+                  <option>Push/Pull/Legs</option>
+                  <option>Upper/Lower</option>
+                  <option>Full Body</option>
+                  <option>Corpo intero a rotazione</option>
+                  <option>Mantieni lo stesso</option>
+                </select>
+              </div>
+              <div>
+                <label for="coach-update-intensity">Intensità desiderata</label>
+                <select id="coach-update-intensity">
+                  <option value="">Decidi tu</option>
+                  <option>Aumenta (voglio spingere di più)</option>
+                  <option>Mantieni uguale</option>
+                  <option>Riduci (troppo faticosa)</option>
+                </select>
+              </div>
+            </div>
+            <div class="meal-row">
+              <label for="coach-update-diet-context">Contesto alimentare attuale (opzionale)</label>
+              <input type="text" id="coach-update-diet-context" placeholder="es. Deficit calorico lieve, mantenimento, surplus, digiuno intermittente..." />
+            </div>
+          </div>
+
+          <!-- Sezione: Foto -->
+          <div class="coach-section">
+            <div class="coach-section-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              Foto progressi (opzionali)
+            </div>
+            <div class="photo-grid">
+              <div class="photo-cell" id="photo-front-cell" onclick="document.getElementById('photo-front-input').click()">
+                <input type="file" id="photo-front-input" accept="image/*" />
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span class="ph-label">Fronte</span>
+                <button type="button" class="ph-remove" onclick="removePhoto('front',event)">✕</button>
+              </div>
+              <div class="photo-cell" id="photo-side-cell" onclick="document.getElementById('photo-side-input').click()">
+                <input type="file" id="photo-side-input" accept="image/*" />
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span class="ph-label">Laterale</span>
+                <button type="button" class="ph-remove" onclick="removePhoto('side',event)">✕</button>
+              </div>
+              <div class="photo-cell" id="photo-back-cell" onclick="document.getElementById('photo-back-input').click()">
+                <input type="file" id="photo-back-input" accept="image/*" />
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span class="ph-label">Schiena</span>
+                <button type="button" class="ph-remove" onclick="removePhoto('back',event)">✕</button>
+              </div>
+            </div>
+            <p style="font-size:.8rem;color:var(--text-muted);margin-top:.35rem">Le foto le alleghi direttamente su ChatGPT / Claude dopo aver copiato il prompt. Il prompt indicherà quante foto hai allegato.</p>
+          </div>
+
+          <button type="button" id="btn-gen-update-prompt" class="btn btn-primary" style="margin-top:.5rem">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Genera prompt completo da copiare
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: generated prompt box -->
+      <div id="coach-prompt-box" class="card" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:.75rem">
+          <h2 style="margin:0">Prompt generato — copia e incolla su ChatGPT / Claude</h2>
+          <button type="button" id="btn-copy-coach-prompt" class="btn btn-primary btn-small">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copia
+          </button>
+        </div>
+        <div id="coach-prompt-text" class="export-box highlight" style="max-height:340px"></div>
+        <p id="coach-copy-hint" class="copy-hint" style="display:none">Copiato! Incollalo su ChatGPT o Claude.</p>
+        <div class="coach-next-hint">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 8v4l3 3"/></svg>
+          Dopo che l'AI ti risponde, torna qui e usa il blocco <strong>"Importa risposta AI"</strong> qui sotto per salvare la scheda direttamente.
+        </div>
+      </div>
+
+      <!-- Step 3: import AI response -->
+      <div id="coach-import-response" class="card" style="display:none">
+        <h2>Importa risposta AI → scheda + dieta</h2>
+        <p style="font-size:.9rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">Incolla qui la risposta completa di ChatGPT / Claude. L'app estrae automaticamente <strong>la nuova scheda</strong> nei blocchi e, se presente, aggiorna anche <strong>il piano dieta</strong> nella sezione "La mia dieta".</p>
+        <textarea id="coach-ai-response" placeholder="Incolla qui la risposta dell'AI con la tua scheda (e il piano dieta, se l'AI lo ha incluso)..." style="min-height:180px"></textarea>
+        <div class="flex-gap mt">
+          <button type="button" id="btn-parse-ai-response" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Analizza e salva come nuova scheda
+          </button>
+        </div>
+        <div id="coach-import-status" class="ai-status" style="display:none"></div>
+      </div>
+    </section>
+
+    <!-- PROGRESSI -->
+    <section id="panel-progress" class="panel">
+      <h1>I miei progressi</h1>
+      <p class="sub">Storico peso e vita — aggiungi una rilevazione e guarda il grafico.</p>
+
+      <div class="card">
+        <h2>Nuova rilevazione</h2>
+        <form id="form-progress">
+          <div class="row">
+            <div><label for="progress-date">Data</label><input type="date" id="progress-date" /></div>
+            <div><label for="progress-weight">Peso (kg)</label><input type="number" id="progress-weight" step="0.1" min="30" placeholder="es. 78.5" required /></div>
+            <div><label for="progress-waist">Vita (cm)</label><input type="number" id="progress-waist" step="0.5" min="40" max="200" placeholder="opzionale" /></div>
+            <div><label for="progress-note">Note</label><input type="text" id="progress-note" placeholder="opzionale" /></div>
+            <div><label>&nbsp;</label><button type="submit" class="btn btn-primary">Aggiungi</button></div>
+          </div>
+        </form>
+      </div>
+
+      <div class="card" id="progress-chart-card" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem">
+          <h2 style="margin:0">Andamento peso</h2>
+          <div style="display:flex;gap:.5rem">
+            <button type="button" class="btn btn-secondary btn-small chart-range-btn active" data-range="all">Tutto</button>
+            <button type="button" class="btn btn-secondary btn-small chart-range-btn" data-range="90">90 gg</button>
+            <button type="button" class="btn btn-secondary btn-small chart-range-btn" data-range="30">30 gg</button>
+          </div>
+        </div>
+        <canvas id="progress-chart" style="width:100%;height:220px;display:block"></canvas>
+        <div id="progress-chart-stats" style="display:flex;gap:1.5rem;flex-wrap:wrap;margin-top:1rem;font-size:.875rem"></div>
+      </div>
+
+      <div class="card">
+        <h2>Storico</h2>
+        <div id="progress-list-wrap" style="overflow-x:auto">
+          <table class="progress-table" id="progress-table-el" style="display:none">
+            <thead><tr><th>Data</th><th>Peso (kg)</th><th>Vita (cm)</th><th>Note</th><th class="del-cell"></th></tr></thead>
+            <tbody id="progress-tbody"></tbody>
+          </table>
+        </div>
+        <div id="progress-empty" class="empty-state">Nessuna rilevazione.</div>
+      </div>
+    </section>
+
+    <!-- EXPORT -->
+    <section id="panel-export" class="panel">
+      <h1>Copia per il PT</h1>
+      <p class="sub">Genera il testo completo da incollare in ChatGPT/Claude (con profilo, dieta, scheda attiva, progressi).</p>
+      <div class="card">
+        <h2>Prompt con i tuoi dati</h2>
+        <button type="button" id="btn-generate-export" class="btn btn-primary">Genera testo</button>
+        <div id="export-box" class="export-box"></div>
+        <button type="button" id="btn-copy-export" class="btn btn-secondary mt" style="display:none">Copia negli appunti</button>
+        <p id="copy-hint" class="copy-hint" style="display:none">Copiato!</p>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="panel-settings" class="panel">
+      <h1>Impostazioni</h1>
+      <p class="sub">Configurazione dell'app e integrazioni.</p>
+
+      <!-- AI Provider (ready for future implementation) -->
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap">
+          <h2 style="margin:0">Provider AI</h2>
+          <span class="settings-coming-soon">Prossimamente</span>
+        </div>
+        <p class="settings-hint">In futuro potrai collegare un'AI direttamente all'app per generare e aggiornare la scheda senza copiare/incollare. Per ora il prompt viene generato qui e tu lo incolli su ChatGPT / Claude. Salva già le chiavi così saranno pronte.</p>
+        <div class="provider-grid">
+          <div class="provider-card" data-provider="gemini">
+            <div class="prov-icon">G</div>
+            <div class="prov-name">Gemini Flash</div>
+            <div class="prov-badge free">Gratis</div>
+            <div class="prov-note">Testo + Foto · 1500 req/giorno</div>
+          </div>
+          <div class="provider-card" data-provider="groq">
+            <div class="prov-icon">Q</div>
+            <div class="prov-name">Groq LLaMA</div>
+            <div class="prov-badge free">Gratis</div>
+            <div class="prov-note">Solo testo · Velocissimo</div>
+          </div>
+          <div class="provider-card" data-provider="ollama">
+            <div class="prov-icon">🦙</div>
+            <div class="prov-name">Ollama (locale)</div>
+            <div class="prov-badge local">Locale</div>
+            <div class="prov-note">Nessun cloud · Gratis</div>
+          </div>
+          <div class="provider-card" data-provider="openai">
+            <div class="prov-icon">AI</div>
+            <div class="prov-name">OpenAI GPT-4o</div>
+            <div class="prov-badge paid">A pagamento</div>
+            <div class="prov-note">Testo + Foto · Qualità top</div>
+          </div>
+        </div>
+
+        <!-- API key fields (saved locally, ready for future use) -->
+        <div style="margin-top:1.25rem;display:flex;flex-direction:column;gap:.75rem">
+          <div class="api-key-row">
+            <div style="flex:1">
+              <label style="font-size:.78rem;margin-bottom:.3rem;display:block;color:var(--text-muted)">Google Gemini — <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent)">aistudio.google.com</a></label>
+              <input type="password" id="settings-gemini-key" placeholder="AIza..." style="margin-bottom:0" />
+            </div>
+            <button type="button" class="btn btn-secondary btn-small" id="btn-save-gemini-key">Salva</button>
+          </div>
+          <div class="api-key-row">
+            <div style="flex:1">
+              <label style="font-size:.78rem;margin-bottom:.3rem;display:block;color:var(--text-muted)">Groq — <a href="https://console.groq.com/keys" target="_blank" style="color:var(--accent)">console.groq.com</a></label>
+              <input type="password" id="settings-groq-key" placeholder="gsk_..." style="margin-bottom:0" />
+            </div>
+            <button type="button" class="btn btn-secondary btn-small" id="btn-save-groq-key">Salva</button>
+          </div>
+          <div class="api-key-row">
+            <div style="flex:1">
+              <label style="font-size:.78rem;margin-bottom:.3rem;display:block;color:var(--text-muted)">OpenAI — <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--accent)">platform.openai.com</a></label>
+              <input type="password" id="settings-api-key" placeholder="sk-..." style="margin-bottom:0" />
+            </div>
+            <button type="button" class="btn btn-secondary btn-small" id="btn-save-api-key">Salva</button>
+          </div>
+          <div class="api-key-row" style="align-items:flex-end;gap:.5rem;flex-wrap:wrap">
+            <div style="flex:1;min-width:160px">
+              <label style="font-size:.78rem;margin-bottom:.3rem;display:block;color:var(--text-muted)">Ollama modello</label>
+              <input type="text" id="settings-ollama-model" placeholder="llama3.2" style="margin-bottom:0" />
+            </div>
+            <div style="flex:1;min-width:200px">
+              <label style="font-size:.78rem;margin-bottom:.3rem;display:block;color:var(--text-muted)">Ollama URL (default: localhost)</label>
+              <input type="text" id="settings-ollama-url" placeholder="http://localhost:11434" style="margin-bottom:0" />
+            </div>
+            <button type="button" class="btn btn-secondary btn-small" id="btn-save-ollama">Salva</button>
+          </div>
+          <p id="ai-keys-status" class="api-key-status"></p>
+        </div>
+      </div>
+
+      <!-- Hevy API -->
+      <div class="card">
+        <h2>Hevy API Key</h2>
+        <p class="settings-hint">Importa le tue routine e sessioni di allenamento direttamente dall'app Hevy. Richiede account <strong>Hevy Pro</strong>. Ottieni la tua key su <a href="https://hevy.com/settings?developer" target="_blank" style="color:var(--accent)">hevy.com/settings?developer</a>.</p>
+        <div class="api-key-row">
+          <input type="password" id="settings-hevy-key" placeholder="API key Hevy..." />
+          <button type="button" id="btn-save-hevy-key" class="btn btn-primary">Salva</button>
+        </div>
+        <p id="hevy-key-status" class="api-key-status"></p>
+      </div>
+
+      <div class="card">
+        <h2>Dati</h2>
+        <p class="settings-hint">Esporta tutti i tuoi dati in formato JSON come backup.</p>
+        <button type="button" id="btn-export-data" class="btn btn-secondary">Esporta tutti i dati (JSON)</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+// ─── DB ────────────────────────────────────────────────────────────────────
+const DB_NAME = 'RobCoachDB';
+const DB_VERSION = 3;
+const CURRENT_USER_KEY = 'rc_current_user_id';
+const LEGACY_USERS_KEY = 'pt_app_users';
+let db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onerror = () => reject(req.error);
+    req.onsuccess = () => { db = req.result; resolve(db); };
+    req.onupgradeneeded = (e) => {
+      const d = e.target.result;
+      ['users','profiles','diet','progress','settings'].forEach(s => {
+        if (!d.objectStoreNames.contains(s)) {
+          const keyPath = s === 'users' ? 'id' : 'userId';
+          d.createObjectStore(s, { keyPath });
+        }
+      });
+      if (!d.objectStoreNames.contains('schede')) {
+        d.createObjectStore('schede', { keyPath: ['userId','versionId'] });
+      }
+      if (!d.objectStoreNames.contains('diete')) {
+        d.createObjectStore('diete', { keyPath: ['userId','versionId'] });
+      }
+    };
+  });
+}
+
+function idbGetAll(s) {
+  return new Promise((res,rej) => {
+    const tx = db.transaction(s,'readonly');
+    const req = tx.objectStore(s).getAll();
+    req.onsuccess = () => res(req.result||[]);
+    req.onerror = () => rej(req.error);
+  });
+}
+function idbGet(s, key) {
+  return new Promise((res,rej) => {
+    const tx = db.transaction(s,'readonly');
+    const req = tx.objectStore(s).get(key);
+    req.onsuccess = () => res(req.result ?? null);
+    req.onerror = () => rej(req.error);
+  });
+}
+function idbPut(s, val) {
+  return new Promise((res,rej) => {
+    const tx = db.transaction(s,'readwrite');
+    const req = tx.objectStore(s).put(val);
+    req.onsuccess = () => res();
+    req.onerror = () => rej(req.error);
+  });
+}
+function idbDelete(s, key) {
+  return new Promise((res,rej) => {
+    const tx = db.transaction(s,'readwrite');
+    const req = tx.objectStore(s).delete(key);
+    req.onsuccess = () => res();
+    req.onerror = () => rej(req.error);
+  });
+}
+function idbGetIndex(s, idx, query) {
+  return new Promise((res,rej) => {
+    const tx = db.transaction(s,'readonly');
+    const req = tx.objectStore(s).index(idx).getAll(query);
+    req.onsuccess = () => res(req.result||[]);
+    req.onerror = () => rej(req.error);
+  });
+}
+
+async function migrateFromLocalStorage() {
+  const raw = localStorage.getItem(LEGACY_USERS_KEY);
+  if (!raw) return;
+  let lu = [];
+  try { lu = JSON.parse(raw); } catch { return; }
+  const idbUsers = await idbGetAll('users');
+  if (idbUsers.length > 0) return;
+  for (const u of lu) {
+    await idbPut('users', u);
+    try {
+      const p = localStorage.getItem('pt_app_user_'+u.id+'_profile');
+      if (p) await idbPut('profiles', { userId:u.id, ...JSON.parse(p) });
+      const d = localStorage.getItem('pt_app_user_'+u.id+'_diet');
+      if (d) await idbPut('diet', { userId:u.id, ...JSON.parse(d) });
+      const w = localStorage.getItem('pt_app_user_'+u.id+'_workout');
+      if (w) {
+        const wd = JSON.parse(w);
+        const scheda = { userId:u.id, versionId:'v1', label:'Scheda 1', createdAt:new Date().toISOString(), days: wd.days||[] };
+        await idbPut('schede', scheda);
+      }
+      const pr = localStorage.getItem('pt_app_user_'+u.id+'_progress');
+      if (pr) await idbPut('progress', { userId:u.id, entries:JSON.parse(pr) });
+    } catch(_) {}
+  }
+}
+
+// ─── User helpers ──────────────────────────────────────────────────────────
+function getUsers() { return idbGetAll('users'); }
+function saveUsers(users) {
+  return idbGetAll('users').then(existing => {
+    const toDelete = existing.filter(u => !users.some(n => n.id===u.id));
+    const p = toDelete.map(u => idbDelete('users', u.id));
+    users.forEach(u => p.push(idbPut('users', u)));
+    return Promise.all(p);
+  });
+}
+function getCurrentUserId() { return localStorage.getItem(CURRENT_USER_KEY)||null; }
+function setCurrentUserId(id) { id ? localStorage.setItem(CURRENT_USER_KEY,id) : localStorage.removeItem(CURRENT_USER_KEY); }
+async function getCurrentUser() {
+  const id = getCurrentUserId();
+  return id ? (await getUsers()).find(u=>u.id===id)||null : null;
+}
+function getUserData(store) {
+  const id = getCurrentUserId();
+  return id ? idbGet(store, id) : Promise.resolve(null);
+}
+function setUserData(store, data) {
+  const id = getCurrentUserId();
+  if (!id) return Promise.resolve();
+  return idbPut(store, { ...data, userId:id });
+}
+
+// ─── Settings / API keys ──────────────────────────────────────────────────
+async function getSettings() {
+  const id = getCurrentUserId() || '__global__';
+  const s = await idbGet('settings', id);
+  return s || {};
+}
+async function saveSettings(patch) {
+  const id = getCurrentUserId() || '__global__';
+  const current = await getSettings();
+  await idbPut('settings', { ...current, userId: id, ...patch });
+}
+async function getApiKey() {
+  const s = await getSettings();
+  return s.apiKey || '';
+}
+async function saveApiKey(key) { await saveSettings({ apiKey: key }); }
+async function getHevyApiKey() {
+  const s = await getSettings();
+  return s.hevyKey || '';
+}
+
+// ─── Schede versioned ──────────────────────────────────────────────────────
+let activeVersionId = null;
+let activeDietVersionId = null;
+
+async function getSchedeForUser() {
+  const id = getCurrentUserId();
+  if (!id) return [];
+  const all = await idbGetAll('schede');
+  return all.filter(s => s.userId === id).sort((a,b) => (a.createdAt||'') < (b.createdAt||'') ? -1 : 1);
+}
+
+async function getActiveScheda() {
+  if (!activeVersionId) return null;
+  const id = getCurrentUserId();
+  if (!id) return null;
+  return idbGet('schede', [id, activeVersionId]);
+}
+
+async function saveActiveScheda(days) {
+  const id = getCurrentUserId();
+  if (!id || !activeVersionId) return;
+  const existing = await idbGet('schede', [id, activeVersionId]);
+  await idbPut('schede', {
+    userId: id,
+    versionId: activeVersionId,
+    label: existing ? existing.label : 'Scheda',
+    createdAt: existing ? existing.createdAt : new Date().toISOString(),
+    days
+  });
+}
+
+async function createNewSchedaVersion(days, label) {
+  const id = getCurrentUserId();
+  if (!id) return null;
+  const existing = await getSchedeForUser();
+  const num = existing.length + 1;
+  const versionId = 'v' + Date.now();
+  const lbl = label || ('Scheda ' + num);
+  await idbPut('schede', { userId:id, versionId, label:lbl, createdAt:new Date().toISOString(), days: days||[] });
+  activeVersionId = versionId;
+  return versionId;
+}
+
+async function deleteActiveScheda() {
+  const id = getCurrentUserId();
+  if (!id || !activeVersionId) return;
+  await idbDelete('schede', [id, activeVersionId]);
+  const remaining = await getSchedeForUser();
+  activeVersionId = remaining.length ? remaining[remaining.length-1].versionId : null;
+}
+
+async function renderSchedaTabs() {
+  const tabsEl = document.getElementById('scheda-tabs');
+  tabsEl.innerHTML = '';
+  const schede = await getSchedeForUser();
+  if (schede.length === 0) {
+    activeVersionId = null;
+    tabsEl.innerHTML = '<span style="color:var(--text-muted);font-size:.85rem">Nessuna scheda. Creane una con AI Coach o aggiungi esercizi e salva.</span>';
+    clearWorkoutForm();
+    return;
+  }
+  if (!activeVersionId || !schede.find(s => s.versionId === activeVersionId)) {
+    activeVersionId = schede[schede.length-1].versionId;
+  }
+  schede.forEach(s => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'scheda-tab' + (s.versionId === activeVersionId ? ' active' : '');
+    btn.textContent = s.label;
+    btn.addEventListener('click', async () => {
+      activeVersionId = s.versionId;
+      await loadWorkoutFromVersion(s.versionId);
+      await renderSchedaTabs();
+    });
+    tabsEl.appendChild(btn);
+  });
+}
+
+async function loadWorkoutFromVersion(vId) {
+  const id = getCurrentUserId();
+  if (!id) return;
+  const s = await idbGet('schede', [id, vId]);
+  clearWorkoutForm();
+  if (!s) return;
+  (s.days||[]).forEach(day => {
+    const nameEl = document.getElementById('workout-day'+day.dayNum+'-name');
+    if (nameEl) nameEl.value = day.name||'';
+    if (day.exercises) setExercisesForDay(day.dayNum, day.exercises);
+  });
+  renderWorkoutPreview();
+}
+
+function clearWorkoutForm() {
+  [1,2,3,4].forEach(n => {
+    const el = document.getElementById('workout-day'+n+'-name');
+    if (el) el.value = '';
+    setExercisesForDay(n, []);
+  });
+  renderWorkoutPreview();
+}
+
+async function loadWorkout() {
+  const schede = await getSchedeForUser();
+  if (schede.length > 0) {
+    if (!activeVersionId || !schede.find(s => s.versionId === activeVersionId)) {
+      activeVersionId = schede[schede.length-1].versionId;
+    }
+    await loadWorkoutFromVersion(activeVersionId);
+  } else {
+    clearWorkoutForm();
+  }
+  await renderSchedaTabs();
+}
+
+// ─── Diet versioning ──────────────────────────────────────────────────────────
+async function getDieteForUser() {
+  const id = getCurrentUserId();
+  if (!id) return [];
+  const all = await idbGetAll('diete');
+  return all.filter(d => d.userId === id).sort((a,b) => (a.createdAt||'') < (b.createdAt||'') ? -1 : 1);
+}
+
+async function getActiveDieta() {
+  if (!activeDietVersionId) return null;
+  const id = getCurrentUserId();
+  if (!id) return null;
+  return idbGet('diete', [id, activeDietVersionId]);
+}
+
+async function saveDieta(data) {
+  const id = getCurrentUserId();
+  if (!id || !activeDietVersionId) return;
+  const existing = await idbGet('diete', [id, activeDietVersionId]);
+  await idbPut('diete', {
+    userId: id,
+    versionId: activeDietVersionId,
+    label: existing ? existing.label : 'Dieta',
+    createdAt: existing ? existing.createdAt : new Date().toISOString(),
+    ...data
+  });
+}
+
+async function createNewDietaVersion(data, label) {
+  const id = getCurrentUserId();
+  if (!id) return null;
+  const existing = await getDieteForUser();
+  const num = existing.length + 1;
+  const versionId = 'dv' + Date.now();
+  const lbl = label || ('Dieta ' + num);
+  await idbPut('diete', { userId:id, versionId, label:lbl, createdAt:new Date().toISOString(), ...(data||{}) });
+  activeDietVersionId = versionId;
+  return versionId;
+}
+
+async function deleteActiveDieta() {
+  const id = getCurrentUserId();
+  if (!id || !activeDietVersionId) return;
+  await idbDelete('diete', [id, activeDietVersionId]);
+  const remaining = await getDieteForUser();
+  activeDietVersionId = remaining.length ? remaining[remaining.length-1].versionId : null;
+}
+
+// ─── Exercise table helpers ─────────────────────────────────────────────────
+function makeExerciseRow(ex) {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td class="col-exercise"><input type="text" placeholder="es. Panca piana" value="${escHtml(ex?.exercise||'')}" /></td><td class="col-weight"><input type="text" placeholder="kg" value="${escHtml(ex?.weight||'')}" /></td><td class="col-sets"><input type="text" placeholder="4" value="${escHtml(ex?.sets||'')}" /></td><td class="col-reps"><input type="text" placeholder="8-10" value="${escHtml(ex?.reps||'')}" /></td><td class="col-alt"><input type="text" placeholder="alternativa" value="${escHtml(ex?.alternative||'')}" /></td><td class="col-del"><button type="button" class="btn-del-row">✕</button></td>`;
+  tr.querySelector('.btn-del-row').addEventListener('click', () => { tr.remove(); renderWorkoutPreview(); });
+  return tr;
+}
+
+function getExercisesFromDay(n) {
+  const tbody = document.getElementById('workout-day'+n+'-tbody');
+  if (!tbody) return [];
+  return Array.from(tbody.querySelectorAll('tr')).map(tr => {
+    const inp = tr.querySelectorAll('input');
+    return { exercise: inp[0]?.value.trim()||'', weight: inp[1]?.value.trim()||'', sets: inp[2]?.value.trim()||'', reps: inp[3]?.value.trim()||'', alternative: inp[4]?.value.trim()||'' };
+  }).filter(r => r.exercise||r.weight||r.sets||r.reps||r.alternative);
+}
+
+function setExercisesForDay(n, exercises) {
+  const tbody = document.getElementById('workout-day'+n+'-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  (exercises||[]).forEach(ex => tbody.appendChild(makeExerciseRow(ex)));
+}
+
+function getCurrentDays() {
+  return [1,2,3,4].map(n => ({
+    dayNum: n,
+    name: document.getElementById('workout-day'+n+'-name')?.value||'',
+    exercises: getExercisesFromDay(n)
+  }));
+}
+
+document.querySelectorAll('.add-exercise').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const day = btn.getAttribute('data-day');
+    document.getElementById('workout-day'+day+'-tbody')?.appendChild(makeExerciseRow({}));
+    renderWorkoutPreview();
+  });
+});
+
+function renderWorkoutPreview() {
+  const container = document.getElementById('workout-preview-content');
+  if (!container) return;
+  const parts = [];
+  for (let n=1; n<=4; n++) {
+    const name = document.getElementById('workout-day'+n+'-name')?.value.trim()||'';
+    const exercises = getExercisesFromDay(n);
+    if (name || exercises.length) {
+      let tbl = '';
+      if (exercises.length) {
+        tbl = '<table><thead><tr><th>Esercizio</th><th>Peso</th><th>Serie</th><th>Rep</th><th>Alternativa</th></tr></thead><tbody>';
+        exercises.forEach(ex => tbl += `<tr><td>${escHtml(ex.exercise)}</td><td>${escHtml(ex.weight)}</td><td>${escHtml(ex.sets)}</td><td>${escHtml(ex.reps)}</td><td>${escHtml(ex.alternative)}</td></tr>`);
+        tbl += '</tbody></table>';
+      }
+      parts.push(`<div class="workout-preview-day"><h4>Giorno ${n}${name ? ' – '+escHtml(name):''}</h4><div class="exercises">${tbl||'—'}</div></div>`);
+    }
+  }
+  if (!parts.length) {
+    container.className = 'workout-preview-empty';
+    container.textContent = "Aggiungi esercizi e salva per vedere l'anteprima.";
+  } else {
+    container.className = '';
+    container.innerHTML = parts.join('');
+  }
+}
+
+document.getElementById('btn-save-workout').addEventListener('click', async () => {
+  if (!getCurrentUserId()) { alert('Seleziona un utente prima.'); return; }
+  const days = getCurrentDays();
+  const schede = await getSchedeForUser();
+  if (!activeVersionId) {
+    await createNewSchedaVersion(days);
+  } else {
+    await saveActiveScheda(days);
+  }
+  renderWorkoutPreview();
+  await renderSchedaTabs();
+  showToast('Scheda salvata.');
+});
+
+document.getElementById('btn-new-scheda-version').addEventListener('click', async () => {
+  if (!getCurrentUserId()) { alert('Seleziona un utente prima.'); return; }
+  await createNewSchedaVersion([]);
+  clearWorkoutForm();
+  await renderSchedaTabs();
+  showToast('Nuova versione creata.');
+});
+
+document.getElementById('btn-delete-version').addEventListener('click', async () => {
+  if (!activeVersionId || !confirm('Eliminare questa versione?')) return;
+  await deleteActiveScheda();
+  await loadWorkout();
+  showToast('Versione eliminata.');
+});
+
+// ─── Import da file ─────────────────────────────────────────────────────────
+const importDropArea = document.getElementById('import-drop-area');
+const importFileInput = document.getElementById('import-file-input');
+
+importDropArea.addEventListener('dragover', e => { e.preventDefault(); importDropArea.classList.add('drag'); });
+importDropArea.addEventListener('dragleave', () => importDropArea.classList.remove('drag'));
+importDropArea.addEventListener('drop', e => { e.preventDefault(); importDropArea.classList.remove('drag'); handleImportFile(e.dataTransfer.files[0]); });
+importFileInput.addEventListener('change', () => handleImportFile(importFileInput.files[0]));
+
+async function handleImportFile(file) {
+  if (!file) return;
+  const status = document.getElementById('import-status');
+  if (!file.type.startsWith('text') && !file.name.endsWith('.txt')) {
+    setStatus(status, 'err', 'Usa un file .txt. Per immagini usa "Incolla testo" dopo aver trascritto il contenuto.');
+    return;
+  }
+  setStatus(status, 'loading', 'Lettura file…');
+  try {
+    const text = await file.text();
+    const days = parseSchedaFromText(text);
+    if (!days.length) {
+      setStatus(status, 'err', 'Non ho trovato esercizi nel file. Controlla il formato (vedi suggerimento sotto).');
+      return;
+    }
+    applyParsedWorkout(days);
+    setStatus(status, 'ok', `Scheda importata: ${days.length} giorno/i compilati.`);
+  } catch(e) {
+    setStatus(status, 'err', 'Errore: ' + e.message);
+  }
+}
+
+// ─── Local text parser (no AI) ──────────────────────────────────────────────
+// Parses free-form workout text into structured days.
+// Supports both JSON (pasted from AI) and plain text formats.
+function parseSchedaFromText(raw) {
+  if (!raw || !raw.trim()) return [];
+
+  // 1. Try JSON first (AI response with ```json block or bare array)
+  const jsonMatch = raw.match(/```json\n?([\s\S]*?)```/);
+  if (jsonMatch) {
+    try { return JSON.parse(jsonMatch[1].trim()); } catch(_) {}
+  }
+  const bareArr = raw.match(/(\[[\s\S]*\])/);
+  if (bareArr) {
+    try {
+      const parsed = JSON.parse(bareArr[1]);
+      if (Array.isArray(parsed) && parsed[0]?.exercises) return parsed;
+    } catch(_) {}
+  }
+
+  // 2. Plain text parsing: look for day headers and exercise lines
+  const days = [];
+  let currentDay = null;
+
+  // Day header patterns: "Giorno 1", "Allenamento 1", "Day 1", "SCHEDA 1",
+  // or lines ending with ":" like "Petto e Tricipiti:"
+  const dayHeaderRe = /^(?:giorno|allenamento|day|scheda|workout|training)\s*(\d+)[:\s\-–]*(.*)/i;
+  // Exercise line: starts with "-", "•", number+dot, or is a line followed by
+  // something that looks like sets×reps or kg
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+
+  for (const line of lines) {
+    const dayMatch = line.match(dayHeaderRe);
+    if (dayMatch) {
+      currentDay = {
+        dayNum: parseInt(dayMatch[1]),
+        name: dayMatch[2].replace(/[:–\-]+$/, '').trim(),
+        exercises: []
+      };
+      days.push(currentDay);
+      continue;
+    }
+
+    // If no day detected yet, create day 1
+    if (!currentDay) {
+      currentDay = { dayNum: 1, name: '', exercises: [] };
+      days.push(currentDay);
+    }
+
+    // Strip bullet/numbering prefix
+    const cleanLine = line.replace(/^[\-•\*\d]+[\.\)]\s*/, '').trim();
+    if (!cleanLine) continue;
+
+    // Try to extract exercise details
+    // Patterns: "Panca piana 80kg 4x8", "Squat | 100 | 4 | 8-10 | alternativa"
+    // pipe-separated
+    if (cleanLine.includes('|')) {
+      const parts = cleanLine.split('|').map(p => p.trim());
+      currentDay.exercises.push({
+        exercise: parts[0] || '',
+        weight: extractWeight(parts[1] || ''),
+        sets: extractSets(parts[2] || ''),
+        reps: extractReps(parts[3] || ''),
+        alternative: parts[4] || ''
+      });
+      continue;
+    }
+
+    // Extract inline numbers (weight, sets, reps)
+    const exName = cleanLine.replace(/\d+[\.,]?\d*\s*kg/gi, '').replace(/\d+\s*[xX×]\s*\d+[-\d]*/g, '').replace(/\d+\s*serie/gi, '').replace(/\d+\s*rip[a-z]*/gi, '').trim().replace(/[\s,]+$/,'');
+    const weightM = cleanLine.match(/(\d+[\.,]?\d*)\s*kg/i);
+    const setsRepsM = cleanLine.match(/(\d+)\s*[xX×]\s*(\d+(?:[-–]\d+)?)/);
+    const serieM = cleanLine.match(/(\d+)\s*serie/i);
+    const ripsM = cleanLine.match(/(\d+(?:[-–]\d+)?)\s*rip/i);
+
+    if (exName.length > 1) {
+      currentDay.exercises.push({
+        exercise: exName,
+        weight: weightM ? weightM[1] : '',
+        sets: setsRepsM ? setsRepsM[1] : (serieM ? serieM[1] : ''),
+        reps: setsRepsM ? setsRepsM[2] : (ripsM ? ripsM[1] : ''),
+        alternative: ''
+      });
+    }
+  }
+
+  return days.filter(d => d.exercises.length > 0);
+}
+
+function extractWeight(s) {
+  const m = s.match(/(\d+[\.,]?\d*)/);
+  return m ? m[1].replace(',','.') : s.trim();
+}
+function extractSets(s) {
+  const m = s.match(/(\d+)/);
+  return m ? m[1] : s.trim();
+}
+function extractReps(s) {
+  const m = s.match(/(\d+(?:[-–]\d+)?)/);
+  return m ? m[1] : s.trim();
+}
+
+function buildImportTextPrompt(text) { return text; } // kept for compatibility
+
+function applyParsedWorkout(days) {
+  if (!Array.isArray(days)) throw new Error('Formato non valido');
+  days.forEach(day => {
+    const nameEl = document.getElementById('workout-day'+day.dayNum+'-name');
+    if (nameEl && day.name) nameEl.value = day.name;
+    setExercisesForDay(day.dayNum, day.exercises||[]);
+  });
+  renderWorkoutPreview();
+}
+
+// ─── AI dispatcher (multi-provider) — kept for possible future use ────────────
+// All coach functions now generate prompts locally. Dispatching is disabled.
+async function callAI() { throw new Error('Funzione AI disabilitata. Usa la generazione locale del prompt.'); }
+
+// ─── Slider live values ───────────────────────────────────────────────────────
+['energy','sleep','stress'].forEach(id => {
+  const slider = document.getElementById('coach-update-'+id);
+  const val = document.getElementById('coach-update-'+id+'-val');
+  if (slider && val) {
+    slider.addEventListener('input', () => { val.textContent = slider.value; });
+  }
+});
+
+// ─── Strength progress rows ───────────────────────────────────────────────────
+let _schedaDays = []; // [{ dayNum, name, exercises: [{name, weight}] }]
+let _schedaExerciseList = []; // flat list — kept for fallback read
+
+async function refreshScheduleExerciseList() {
+  const scheda = await getActiveScheda();
+  _schedaDays = [];
+  _schedaExerciseList = [];
+  if (scheda?.days) {
+    scheda.days.forEach(d => {
+      const exs = (d.exercises || [])
+        .filter(ex => ex.exercise)
+        .map(ex => ({ name: ex.exercise, weight: ex.weight || '' }));
+      if (exs.length) {
+        _schedaDays.push({ dayNum: d.dayNum, name: d.name || ('Giornata ' + d.dayNum), exercises: exs });
+        exs.forEach(e => {
+          if (!_schedaExerciseList.find(x => x.name === e.name))
+            _schedaExerciseList.push(e);
+        });
+      }
+    });
+  }
+}
+
+function makeStrengthRowOptions(dayExercises, selectedName) {
+  // dayExercises = [{name, weight}] — only exercises of that day
+  let opts = '<option value="">— scegli esercizio —</option>';
+  dayExercises.forEach(e => {
+    const sel = e.name === selectedName ? ' selected' : '';
+    opts += `<option value="${escHtml(e.name)}"${sel}>${escHtml(e.name)}</option>`;
+  });
+  opts += `<option value="__custom__">Altro (scrivi sotto)…</option>`;
+  return opts;
+}
+
+function addStrengthRow(exName, kg, dayExercises) {
+  const container = document.getElementById('strength-progress-rows');
+  if (!container) return;
+
+  const exercises = dayExercises || _schedaExerciseList;
+  const hasScheda = exercises.length > 0;
+  const div = document.createElement('div');
+  div.className = 'strength-row';
+
+  if (hasScheda) {
+    div.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:.3rem;flex:1">
+        <select class="sr-exercise-sel" style="margin-bottom:0;font-size:.88rem">
+          ${makeStrengthRowOptions(exercises, exName || '')}
+        </select>
+        <input type="text" class="sr-exercise-custom" placeholder="Scrivi esercizio…"
+          style="display:none;margin-bottom:0;font-size:.85rem"
+          value="${escHtml(exName && !exercises.find(e => e.name === exName) ? exName : '')}" />
+      </div>
+      <input type="number" class="sr-kg" placeholder="kg attuale" min="0" step="0.5"
+        value="${escHtml(kg || '')}"
+        style="width:90px;margin-bottom:0" />
+      <button type="button" title="Rimuovi" style="flex-shrink:0">✕</button>`;
+
+    const sel = div.querySelector('.sr-exercise-sel');
+    const custom = div.querySelector('.sr-exercise-custom');
+    const kgInput = div.querySelector('.sr-kg');
+
+    if (exName && !exercises.find(e => e.name === exName)) {
+      sel.value = '__custom__';
+      custom.style.display = '';
+    }
+
+    sel.addEventListener('change', () => {
+      if (sel.value === '__custom__') {
+        custom.style.display = '';
+        custom.focus();
+        kgInput.value = '';
+      } else {
+        custom.style.display = 'none';
+        custom.value = '';
+        const found = exercises.find(e => e.name === sel.value);
+        if (found && found.weight && !kgInput.value) kgInput.value = found.weight;
+      }
+    });
+  } else {
+    div.innerHTML = `
+      <input type="text" class="sr-exercise" placeholder="Esercizio (es. Panca piana)"
+        value="${escHtml(exName || '')}" />
+      <input type="number" class="sr-kg" placeholder="kg" min="0" step="0.5"
+        value="${escHtml(kg || '')}" />
+      <button type="button" title="Rimuovi">✕</button>`;
+  }
+
+  div.querySelector('button').addEventListener('click', () => div.remove());
+  container.appendChild(div);
+}
+
+function renderStrengthByDays() {
+  const container = document.getElementById('strength-progress-rows');
+  if (!container) return;
+  container.innerHTML = '';
+
+  _schedaDays.forEach(day => {
+    // Day header divider
+    const header = document.createElement('div');
+    header.className = 'strength-day-header';
+    header.innerHTML = `<span>${escHtml(day.name)}</span>`;
+    container.appendChild(header);
+
+    // One row per exercise in this day
+    day.exercises.forEach(ex => addStrengthRow(ex.name, ex.weight, day.exercises));
+
+    // "+ aggiungi" link for this day
+    const addLink = document.createElement('button');
+    addLink.type = 'button';
+    addLink.className = 'btn btn-secondary btn-small';
+    addLink.style.cssText = 'margin-top:.25rem;margin-bottom:.25rem;font-size:.78rem;padding:.3rem .6rem';
+    addLink.textContent = '+ Aggiungi esercizio a ' + day.name;
+    addLink.addEventListener('click', () => {
+      // insert before the next day header or at end
+      const nextHeader = addLink.nextElementSibling?.classList.contains('strength-day-header')
+        ? addLink.nextElementSibling : null;
+      const newRow = document.createElement('div');
+      // temporarily append to get the row, then move it
+      addStrengthRow('', '', day.exercises);
+      const last = container.lastElementChild;
+      container.insertBefore(last, nextHeader || addLink);
+    });
+    container.appendChild(addLink);
+  });
+}
+
+document.getElementById('btn-add-strength-row')?.addEventListener('click', () => {
+  // adds a free row at the bottom using the flat list (for manually adding extra)
+  addStrengthRow('', '', _schedaExerciseList);
+});
+
+document.getElementById('btn-prefill-strength')?.addEventListener('click', async () => {
+  await refreshScheduleExerciseList();
+  const container = document.getElementById('strength-progress-rows');
+  if (!container) return;
+  if (!_schedaDays.length) {
+    showToast('Nessuna scheda attiva trovata. Salva prima la tua scheda.');
+    return;
+  }
+  renderStrengthByDays();
+});
+
+// Pre-populate strength rows from active scheda exercises when coach panel opens
+async function prefillStrengthRows() {
+  await refreshScheduleExerciseList();
+  const container = document.getElementById('strength-progress-rows');
+  if (!container || container.children.length > 0) return;
+  if (!_schedaDays.length) return;
+  renderStrengthByDays();
+}
+
+// ─── Coach – genera prompt (no AI call) ──────────────────────────────────────
+document.getElementById('btn-gen-new-prompt').addEventListener('click', async () => {
+  if (!getCurrentUserId()) { alert('Seleziona un utente prima.'); return; }
+  const p = await getUserData('profiles');
+  const currentDiet = await getActiveDieta();
+  const progressList = await getProgressList();
+  const obj = document.getElementById('coach-new-objective').value.trim();
+  const days = document.getElementById('coach-new-days').value || '4';
+  const notes = document.getElementById('coach-new-notes').value.trim();
+  const prompt = await buildNewSchedaPrompt(p, currentDiet, obj, days, notes, progressList);
+  showCoachPrompt(prompt);
+});
+
+document.getElementById('btn-gen-update-prompt').addEventListener('click', async () => {
+  if (!getCurrentUserId()) { alert('Seleziona un utente prima.'); return; }
+  const p = await getUserData('profiles');
+  const currentScheda = await getActiveScheda();
+  const currentDiet = await getActiveDieta();
+  const progressList = await getProgressList();
+
+  // gather all the new fields
+  const feel = document.getElementById('coach-update-feel').value.trim();
+  const newWeight = document.getElementById('coach-update-weight').value.trim();
+  const newWaist = document.getElementById('coach-update-waist').value.trim();
+  const weeks = document.getElementById('coach-update-weeks').value.trim();
+  const energy = document.getElementById('coach-update-energy').value;
+  const sleep = document.getElementById('coach-update-sleep').value;
+  const stress = document.getElementById('coach-update-stress').value;
+  const injuries = document.getElementById('coach-update-injuries').value.trim();
+  const changes = document.getElementById('coach-update-changes').value.trim();
+  const split = document.getElementById('coach-update-split').value;
+  const intensity = document.getElementById('coach-update-intensity').value;
+  const dietCtx = document.getElementById('coach-update-diet-context').value.trim();
+
+  // muscle perception
+  const muscles = ['petto','schiena','spalle','bicipiti','tricipiti','gambe','posteriori','addome'];
+  const musclePerception = {};
+  muscles.forEach(m => {
+    const val = document.getElementById('rir-'+m)?.value;
+    if (val) musclePerception[m] = val;
+  });
+
+  // strength progress rows
+  const strengthRows = [];
+  document.querySelectorAll('.strength-row').forEach(row => {
+    // supports both select-based rows and plain text input rows
+    let ex = '';
+    const sel = row.querySelector('.sr-exercise-sel');
+    if (sel) {
+      ex = sel.value === '__custom__'
+        ? (row.querySelector('.sr-exercise-custom')?.value.trim() || '')
+        : sel.value.trim();
+    } else {
+      ex = row.querySelector('.sr-exercise')?.value.trim() || '';
+    }
+    const kg = row.querySelector('.sr-kg')?.value.trim();
+    if (ex) strengthRows.push({ exercise: ex, kg });
+  });
+
+  const hasPhotos = ['front','side','back'].filter(s => document.getElementById('photo-'+s+'-input')?.files[0]).length;
+
+  const prompt = await buildUpdateSchedaPrompt(p, currentScheda, currentDiet, {
+    feel, newWeight, newWaist, weeks, energy, sleep, stress,
+    injuries, changes, split, intensity, dietCtx,
+    musclePerception, strengthRows, hasPhotos, progressList
+  });
+  showCoachPrompt(prompt);
+});
+
+function showCoachPrompt(prompt) {
+  const box = document.getElementById('coach-prompt-box');
+  const textEl = document.getElementById('coach-prompt-text');
+  const importBox = document.getElementById('coach-import-response');
+  textEl.textContent = prompt;
+  box.style.display = '';
+  importBox.style.display = '';
+  box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Update step pills
+  document.querySelectorAll('.coach-step-pill').forEach((p,i) => p.classList.toggle('active', i >= 1));
+}
+
+document.getElementById('btn-copy-coach-prompt').addEventListener('click', () => {
+  const text = document.getElementById('coach-prompt-text').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const hint = document.getElementById('coach-copy-hint');
+    hint.style.display = 'block';
+    setTimeout(() => { hint.style.display = 'none'; }, 2500);
+    // advance step
+    document.querySelectorAll('.coach-step-pill').forEach((p,i) => p.classList.toggle('active', i === 2));
+  });
+});
+
+// ─── Coach – parse AI response & save scheda + diet ──────────────────────────
+document.getElementById('btn-parse-ai-response').addEventListener('click', async () => {
+  if (!getCurrentUserId()) { alert('Seleziona un utente prima.'); return; }
+  const raw = document.getElementById('coach-ai-response').value.trim();
+  const statusEl = document.getElementById('coach-import-status');
+  if (!raw) { setStatus(statusEl, 'err', 'Incolla prima la risposta dell\'AI.'); return; }
+  setStatus(statusEl, 'loading', 'Analisi testo in corso…');
+  try {
+    let savedScheda = false;
+    let savedDiet = false;
+
+    // 1. Parse and save workout scheda
+    const days = parseSchedaFromText(raw);
+    if (days.length) {
+      const existingSchede = await getSchedeForUser();
+      const newVid = await createNewSchedaVersion(days, 'Scheda ' + (existingSchede.length + 1));
+      await loadWorkoutFromVersion(newVid);
+      await renderSchedaTabs();
+      savedScheda = true;
+    }
+
+    // 2. Parse and save diet as new version (json-diet block)
+    const dietMatch = raw.match(/```json-diet\n?([\s\S]*?)```/);
+    if (dietMatch) {
+      try {
+        const dietObj = JSON.parse(dietMatch[1].trim());
+        const existingDiete = await getDieteForUser();
+        await applyAndSaveDietFromAI(dietObj, 'Dieta ' + (existingDiete.length + 1));
+        savedDiet = true;
+      } catch(_) {}
+    }
+
+    if (!savedScheda && !savedDiet) {
+      setStatus(statusEl, 'err', 'Non ho trovato né una scheda strutturata né un piano dieta. Assicurati che l\'AI abbia risposto con i blocchi JSON nel formato indicato.');
+      return;
+    }
+
+    const parts = [];
+    if (savedScheda) parts.push('nuova scheda salvata');
+    if (savedDiet) parts.push('piano dieta aggiornato');
+    setStatus(statusEl, 'ok', `Fatto: ${parts.join(' + ')}. ${savedDiet ? 'Vai su "La mia dieta" per vedere il piano aggiornato.' : ''}`);
+    document.querySelectorAll('.coach-step-pill').forEach(p => p.classList.add('active'));
+
+    const goBtn = document.createElement('button');
+    goBtn.type = 'button';
+    goBtn.className = 'btn btn-secondary btn-small mt go-workout-btn';
+    goBtn.textContent = 'Vai alla scheda →';
+    goBtn.onclick = () => navigate('workout');
+    const existing = statusEl.parentElement.querySelector('.go-workout-btn');
+    if (!existing) statusEl.parentElement.appendChild(goBtn);
+
+    if (savedDiet) {
+      const goDietBtn = document.createElement('button');
+      goDietBtn.type = 'button';
+      goDietBtn.className = 'btn btn-secondary btn-small mt';
+      goDietBtn.textContent = 'Vai alla dieta →';
+      goDietBtn.onclick = () => navigate('diet');
+      statusEl.parentElement.appendChild(goDietBtn);
+    }
+  } catch(e) {
+    setStatus(statusEl, 'err', 'Errore: ' + e.message);
+  }
+});
+
+async function buildNewSchedaPrompt(profile, currentDiet, objective, days, notes, progressList) {
+
+  // ── Elabora storico progressi ─────────────────────────────────────────────
+  const allProgress = (progressList || []).slice().sort((a, b) => new Date(a.date) - new Date(b.date));
+  const recent = allProgress.slice(-12);
+
+  let progressBlock = '  Nessun dato di progressione corporea disponibile — prima scheda assoluta.';
+  let progressContext = '';
+
+  if (recent.length >= 2) {
+    const first = recent[0];
+    const last  = recent[recent.length - 1];
+    const wDelta = parseFloat(last.weight) - parseFloat(first.weight);
+    const sign   = wDelta > 0 ? '+' : '';
+
+    const withWaist = recent.filter(e => e.waist);
+    let waistLine = '';
+    if (withWaist.length >= 2) {
+      const wf = parseFloat(withWaist[0].waist);
+      const wl = parseFloat(withWaist[withWaist.length - 1].waist);
+      const wd = wl - wf;
+      waistLine = `\n  Vita     : ${wf} → ${wl} cm (${wd > 0 ? '+' : ''}${wd.toFixed(1)} cm)`;
+    }
+
+    const rows = recent.map(e =>
+      `  ${e.date}  ${e.weight} kg${e.waist ? '  vita ' + e.waist + ' cm' : ''}${e.note ? '  — ' + e.note : ''}`
+    ).join('\n');
+
+    // Determina il trend per contestualizzare le istruzioni al PT
+    const trend = wDelta < -1 ? 'calo peso' : wDelta > 1 ? 'aumento peso' : 'peso stabile';
+
+    progressBlock = `Periodo: ${first.date} → ${last.date}
+  Peso     : ${first.weight} → ${last.weight} kg (${sign}${wDelta.toFixed(1)} kg — ${trend})${waistLine}
+  Rilevazioni disponibili: ${recent.length}
+
+  Storico (dal più vecchio al più recente):
+${rows}`;
+
+    progressContext = `\nCONTESTO PROGRESSI DA CONSIDERARE:
+L'atleta ha già uno storico di dati corporei. Il trend mostra: ${trend} (${sign}${wDelta.toFixed(1)} kg in ${recent.length} rilevazioni).
+Usa questi dati per:
+  - Calibrare il volume e l'intensità della scheda in modo coerente con il trend reale
+  - Stimare il range calorico attuale e consigliare un target realistico
+  - Identificare se l'obiettivo dichiarato è allineato con l'andamento effettivo
+  - Proporre una progressione concreta nelle prossime 4 settimane`;
+
+  } else if (recent.length === 1) {
+    const e = recent[0];
+    progressBlock = `  Unica rilevazione: ${e.date} — ${e.weight} kg${e.waist ? ', vita ' + e.waist + ' cm' : ''}${e.note ? ' — ' + e.note : ''}`;
+    progressContext = `\nCONTESTO: disponibile solo una rilevazione corporea — considera questo dato come punto di partenza per la progressione.`;
+  }
+
+  return `Sei un personal trainer certificato e professionista di alto livello. Il tuo compito è creare una scheda di allenamento personalizzata e, sulla base della dieta attuale dell'atleta, consigliare anche un piano alimentare ottimizzato.
+
+Rispondi SOLO in italiano. Sii diretto, preciso, professionale.
+
+${'━'.repeat(56)}
+PROFILO ATLETA
+${'━'.repeat(56)}
+Sesso            : ${profile?.sex||'—'}
+Età              : ${profile?.age||'—'} anni
+Altezza          : ${profile?.height||'—'} cm
+Peso attuale     : ${profile?.weight||'—'} kg
+Livello          : ${profile?.level||'—'}
+Giorni pesi/sett.: ${profile?.daysWeights||days||'4'}
+Giorni cardio/sett: ${profile?.daysCardio||'—'}
+
+${'━'.repeat(56)}
+OBIETTIVO
+${'━'.repeat(56)}
+${objective||'Aumento massa muscolare e riduzione grasso addominale'}
+${notes ? '\nNOTE / LIMITAZIONI / ATTREZZATURA:\n'+notes : ''}
+
+${'━'.repeat(56)}
+STORICO PROGRESSI CORPOREI
+${'━'.repeat(56)}
+${progressBlock}
+${progressContext}
+
+${'━'.repeat(56)}
+DIETA ATTUALE (giornata tipo dichiarata)
+${'━'.repeat(56)}
+${formatDietForPrompt(currentDiet)}
+
+${'━'.repeat(56)}
+COSA TI CHIEDO
+${'━'.repeat(56)}
+1. ANALISI STRATEGIA (2-3 paragrafi):
+   - Approccio consigliato per raggiungere l'obiettivo tenendo conto del trend corporeo reale
+   - Commento sulla dieta attuale: stima calorica, adeguatezza proteica (target 1.8-2.2g/kg),
+     cosa funziona e cosa va migliorato
+   - Se disponibile lo storico: analizza il trend peso/vita e indica se l'atleta sta andando
+     nella direzione giusta, a quale velocità e cosa correggere
+
+2. SCHEDA DI ALLENAMENTO COMPLETA da ${days} giorni:
+   - Esercizi fondamentali + complementari bilanciati per il livello e il trend rilevato
+   - Per ogni esercizio: peso consigliato (kg realistici per il livello), serie, ripetizioni, recupero
+   - Per ogni esercizio: 1 ALTERNATIVA concreta (per infortuni, attrezzi mancanti o variazione)
+   - Volume e intensità calibrati sul trend corporeo: se l'atleta sta perdendo peso
+     velocemente → mantieni il volume; se sta guadagnando massa → progressione carico
+
+3. PIANO ALIMENTARE CONSIGLIATO — giornata tipo ottimizzata per l'obiettivo:
+   Usa alimenti con grammature specifiche, adatta le macro all'obiettivo e al trend reale.
+   Se lo storico mostra un trend di calo/aumento, calibra il deficit/surplus di conseguenza.
+
+4. 3 FOCUS per le prossime 4 settimane (allenamento + alimentazione + recupero)
+
+${'━'.repeat(56)}
+FORMATO RISPOSTA RICHIESTO
+${'━'.repeat(56)}
+Scrivi prima l'analisi testuale (punti 1 e 4), poi i due blocchi JSON:
+
+BLOCCO 1 — Scheda allenamento:
+\`\`\`json
+[
+  {
+    "dayNum": 1,
+    "name": "Petto e Tricipiti",
+    "exercises": [
+      { "exercise": "Panca piana bilanciere", "weight": "80", "sets": "4", "reps": "8-10", "alternative": "Panca con manubri" }
+    ]
+  }
+]
+\`\`\`
+
+BLOCCO 2 — Piano alimentare consigliato:
+\`\`\`json-diet
+{
+  "colazione":  { "carbs": "...", "proteins": "...", "fats": "..." },
+  "spuntino1":  { "carbs": "...", "proteins": "...", "fats": "..." },
+  "pranzo":     { "carbs": "...", "proteins": "...", "fats": "..." },
+  "spuntino2":  { "carbs": "...", "proteins": "...", "fats": "..." },
+  "cena":       { "carbs": "...", "proteins": "...", "fats": "..." },
+  "extra":      { "carbs": "...", "proteins": "...", "fats": "..." },
+  "note": "Calorie totali stimate, target proteico giornaliero, indicazioni pratiche"
+}
+\`\`\`
+
+IMPORTANTE: pesi realistici per il livello indicato, alimenti con grammature specifiche (es. "80g pasta integrale" non solo "pasta").`;
+}
+
+async function buildUpdateSchedaPrompt(profile, currentScheda, currentDiet, opts) {
+  const {
+    feel, newWeight, newWaist, weeks, energy, sleep, stress,
+    injuries, changes, split, intensity, dietCtx,
+    musclePerception, strengthRows, hasPhotos, progressList
+  } = opts;
+
+  // ── Elabora storico progressi corporei ───────────────────────────────────
+  const allProgress = ((progressList) || [])
+    .slice().sort((a, b) => new Date(a.date) - new Date(b.date));
+  const recent = allProgress.slice(-12);
+
+  let progressBlock;
+  if (recent.length >= 2) {
+    const first = recent[0];
+    const last  = recent[recent.length - 1];
+    const wDelta = parseFloat(last.weight) - parseFloat(first.weight);
+    const sign   = wDelta > 0 ? '+' : '';
+    const trend  = wDelta < -0.5 ? 'calo peso' : wDelta > 0.5 ? 'aumento peso' : 'peso stabile';
+
+    const withWaist = recent.filter(e => e.waist);
+    let waistLine = '';
+    if (withWaist.length >= 2) {
+      const wf = parseFloat(withWaist[0].waist);
+      const wl = parseFloat(withWaist[withWaist.length - 1].waist);
+      const wd = wl - wf;
+      waistLine = `\n  Vita      : ${wf} → ${wl} cm (${wd > 0 ? '+' : ''}${wd.toFixed(1)} cm)`;
+    }
+
+    const rows = recent.map(e =>
+      `  ${e.date}  peso ${e.weight} kg${e.waist ? '  vita ' + e.waist + ' cm' : ''}${e.note ? '  — ' + e.note : ''}`
+    ).join('\n');
+
+    progressBlock = `Periodo analizzato : ${first.date} → ${last.date}
+  Peso      : ${first.weight} → ${last.weight} kg (${sign}${wDelta.toFixed(1)} kg — ${trend})${waistLine}
+  N° rilevazioni : ${recent.length}
+
+  Dettaglio cronologico:
+${rows}
+
+  ⚑ ISTRUZIONE PER IL PT: Usa questo trend reale per calibrare volume, intensità
+  e target calorico della nuova scheda. Se il calo/aumento è troppo rapido o lento
+  rispetto all'obiettivo dichiarato, indicalo esplicitamente e correggi la strategia.`;
+  } else if (recent.length === 1) {
+    const e = recent[0];
+    progressBlock = `  Unica rilevazione: ${e.date} — peso ${e.weight} kg${e.waist ? ', vita ' + e.waist + ' cm' : ''}${e.note ? ' — ' + e.note : ''}`;
+  } else {
+    progressBlock = `  Nessun dato di progressione corporea registrato.`;
+  }
+
+  const w = newWeight || profile?.weight || '—';
+  const prevW = profile?.weight;
+  const weightDelta = newWeight && prevW && newWeight !== String(prevW)
+    ? ` (precedente: ${prevW} kg — variazione: ${(parseFloat(newWeight)-parseFloat(prevW)).toFixed(1)} kg)`
+    : '';
+
+  const muscleLines = Object.entries(musclePerception||{})
+    .map(([m, v]) => `  • ${m.charAt(0).toUpperCase()+m.slice(1)}: ${v}`)
+    .join('\n') || '  (non compilato)';
+
+  const strengthLines = strengthRows?.length
+    ? strengthRows.map(r => `  • ${r.exercise}: ${r.kg ? r.kg+' kg' : '(peso non inserito)'}`).join('\n')
+    : '  (non compilato)';
+
+  return `Sei un personal trainer certificato e professionista di alto livello. Hai davanti un atleta con cui lavori da tempo. Conosci la sua storia, le sue schede precedenti e i suoi obiettivi. Il tuo compito è analizzare tutta la situazione attuale e costruire una NUOVA scheda di allenamento ottimizzata, concreta e progressiva.
+
+Rispondi SOLO in italiano. Sii diretto, preciso, professionale — come farebbe un vero PT in studio.
+
+${'━'.repeat(56)}
+PROFILO ATLETA
+${'━'.repeat(56)}
+Sesso            : ${profile?.sex||'—'}
+Età              : ${profile?.age||'—'} anni
+Altezza          : ${profile?.height||'—'} cm
+Peso attuale     : ${w} kg${weightDelta}
+Circonferenza vita: ${newWaist ? newWaist+' cm' : (profile?.waist ? profile.waist+' cm' : '—')}
+Livello          : ${profile?.level||'—'}
+Giorni pesi/sett.: ${profile?.daysWeights||'—'}
+Giorni cardio/sett: ${profile?.daysCardio||'—'}
+Settimane su questa scheda: ${weeks||'—'}
+Contesto dieta   : ${dietCtx||'—'}
+
+${'━'.repeat(56)}
+STATO PSICOFISICO SETTIMANA TIPO
+${'━'.repeat(56)}
+Energia media    : ${energy}/10
+Qualità sonno    : ${sleep}/10
+Livello stress   : ${stress}/10
+
+${'━'.repeat(56)}
+STORICO PROGRESSI CORPOREI (dati reali registrati dall'atleta)
+${'━'.repeat(56)}
+${progressBlock}
+
+${'━'.repeat(56)}
+SCHEDA ATTUALE (da valutare e aggiornare)
+${'━'.repeat(56)}
+${formatSchedaForPrompt(currentScheda)}
+
+${'━'.repeat(56)}
+PERCEZIONE DELLO SFORZO PER GRUPPO MUSCOLARE
+${'━'.repeat(56)}
+${muscleLines}
+
+${'━'.repeat(56)}
+PROGRESSI DI FORZA RILEVATI
+${'━'.repeat(56)}
+${strengthLines}
+
+${'━'.repeat(56)}
+FEEDBACK DELL'ATLETA
+${'━'.repeat(56)}
+Come si è trovato con la scheda: ${feel||'—'}
+Infortuni / dolori / zone da proteggere: ${injuries||'Nessuno segnalato'}
+Cosa vuole cambiare o migliorare: ${changes||'—'}
+Split preferito: ${split||'A tua discrezione'}
+Intensità desiderata: ${intensity||'A tua discrezione'}
+${hasPhotos ? `\nFOTO PROGRESSI ALLEGATE: ${hasPhotos} foto (fronte / laterale / schiena)\nAnalizza attentamente la composizione corporea: simmetria, punti deboli evidenti, gruppi muscolari che necessitano più lavoro, qualità del grasso viscerale vs sottocutaneo.` : ''}
+
+${'━'.repeat(56)}
+DIETA ATTUALE (giornata tipo)
+${'━'.repeat(56)}
+${formatDietForPrompt(currentDiet)}
+Contesto dichiarato dall'atleta: ${dietCtx||'—'}
+
+${'━'.repeat(56)}
+COSA TI CHIEDO
+${'━'.repeat(56)}
+1. ANALISI COMPLETA (3-5 paragrafi):
+   - Valutazione della scheda attuale: cosa funziona, cosa no, eventuali squilibri
+   - Lettura dei progressi di forza e del feedback muscolare
+   - Lettura delle foto se allegate
+   - Analisi del trend corporeo dallo storico: il peso sta andando nella direzione giusta?
+     A che velocità? È coerente con l'obiettivo dichiarato? Cosa correggere?
+   - Raccomandazioni specifiche su volume, intensità, recupero basate sul trend reale
+   - Analisi della dieta attuale: stima del bilancio calorico, adeguatezza proteica (target 1.8-2.2g/kg),
+     distribuzione dei nutrienti, punti da migliorare
+
+2. NUOVA SCHEDA COMPLETA con queste caratteristiche:
+   - Esercizi fondamentali + complementari bilanciati
+   - Per ogni esercizio: peso consigliato (kg realistici), serie, ripetizioni, tempo di recupero
+   - Per ogni esercizio: 1 ALTERNATIVA concreta (per infortuni, attrezzi mancanti o variazione)
+   - Progressione logica rispetto alla scheda precedente
+   - Note di esecuzione per i movimenti critici
+
+3. PIANO ALIMENTARE CONSIGLIATO — giornata tipo aggiornata:
+   Fornisci la dieta consigliata in questo esatto formato JSON dopo il blocco scheda:
+
+\`\`\`json-diet
+{
+  "colazione":  { "carbs": "...", "proteins": "...", "fats": "..." },
+  "spuntino1":  { "carbs": "...", "proteins": "...", "fats": "..." },
+  "pranzo":     { "carbs": "...", "proteins": "...", "fats": "..." },
+  "spuntino2":  { "carbs": "...", "proteins": "...", "fats": "..." },
+  "cena":       { "carbs": "...", "proteins": "...", "fats": "..." },
+  "extra":      { "carbs": "...", "proteins": "...", "fats": "..." },
+  "note": "..."
+}
+\`\`\`
+   Per ogni campo usa alimenti con grammature (es. "80g riso basmati, 1 cucchiaio olio EVO").
+   Adatta le calorie e le macro all'obiettivo dell'atleta e al contesto dichiarato.
+
+4. 3 FOCUS PRINCIPALI per le prossime 4 settimane (allenamento + alimentazione + recupero)
+
+${'━'.repeat(56)}
+FORMATO RISPOSTA RICHIESTO
+${'━'.repeat(56)}
+Scrivi prima l'analisi testuale completa (punti 1 e 4), poi fornisci la nuova scheda e il piano dieta nei blocchi JSON qui sotto.
+
+BLOCCO 1 — Scheda allenamento:
+\`\`\`json
+[
+  {
+    "dayNum": 1,
+    "name": "Petto e Tricipiti",
+    "exercises": [
+      {
+        "exercise": "Panca piana bilanciere",
+        "weight": "80",
+        "sets": "4",
+        "reps": "6-8",
+        "alternative": "Panca piana manubri"
+      }
+    ]
+  }
+]
+\`\`\`
+
+BLOCCO 2 — Piano alimentare consigliato:
+\`\`\`json-diet
+{
+  "colazione":  { "carbs": "...", "proteins": "...", "fats": "..." },
+  "spuntino1":  { "carbs": "...", "proteins": "...", "fats": "..." },
+  "pranzo":     { "carbs": "...", "proteins": "...", "fats": "..." },
+  "spuntino2":  { "carbs": "...", "proteins": "...", "fats": "..." },
+  "cena":       { "carbs": "...", "proteins": "...", "fats": "..." },
+  "extra":      { "carbs": "...", "proteins": "...", "fats": "..." },
+  "note": "Aggiungi qui note su calorie totali stimate, target proteico, indicazioni pratiche"
+}
+\`\`\`
+
+IMPORTANTE:
+- Usa pesi realistici e aggiornati rispetto alla scheda attuale e ai progressi indicati.
+- Non lasciare mai il campo peso della scheda vuoto — indica un range se non sei sicuro (es. "70-80").
+- Per il piano alimentare usa alimenti con grammature specifiche, non solo categorie generiche.`;
+}
+
+function formatSchedaForPrompt(scheda) {
+  if (!scheda || !scheda.days) return '(nessuna scheda salvata)';
+
+  const lines = [];
+  scheda.days.forEach(d => {
+    if (!d.name && (!d.exercises || !d.exercises.length)) return;
+    lines.push(`\nGIORNO ${d.dayNum} — ${d.name || '—'}`);
+    if (!d.exercises || !d.exercises.length) {
+      lines.push('  (nessun esercizio)');
+      return;
+    }
+    // header
+    const col1 = 28, col2 = 8, col3 = 6, col4 = 8, col5 = 22;
+    const sep = `  ${'─'.repeat(col1+col2+col3+col4+col5+12)}`;
+    lines.push(sep);
+    lines.push(`  ${'Esercizio'.padEnd(col1)} ${'Peso'.padEnd(col2)} ${'Serie'.padEnd(col3)} ${'Rep'.padEnd(col4)} ${'Alternativa'.padEnd(col5)}`);
+    lines.push(sep);
+    d.exercises.forEach(ex => {
+      const name = (ex.exercise||'—').slice(0,col1).padEnd(col1);
+      const w    = (ex.weight ? ex.weight+' kg' : '—').padEnd(col2);
+      const s    = (ex.sets||'—').padEnd(col3);
+      const r    = (ex.reps||'—').padEnd(col4);
+      const alt  = (ex.alternative||'—').slice(0,col5).padEnd(col5);
+      lines.push(`  ${name} ${w} ${s} ${r} ${alt}`);
+    });
+    lines.push(sep);
+  });
+  return lines.join('\n') || '(scheda vuota)';
+}
+
+function formatDietForPrompt(diet) {
+  if (!diet) return '(nessuna dieta salvata — compilare la sezione "La mia dieta")';
+  const MEALS = [
+    { key: 'colazione',  label: 'Colazione' },
+    { key: 'spuntino1',  label: 'Spuntino 1' },
+    { key: 'pranzo',     label: 'Pranzo' },
+    { key: 'spuntino2',  label: 'Spuntino 2' },
+    { key: 'cena',       label: 'Cena' },
+    { key: 'extra',      label: 'Extra' },
+  ];
+  const col0 = 12, col1 = 30, col2 = 30;
+  const sep = `${'─'.repeat(col0+col1+col2+6)}`;
+  const lines = [sep, `${'Pasto'.padEnd(col0)} ${'Carboidrati / Glucidi'.padEnd(col1)} ${'Proteine'.padEnd(col2)}`, sep];
+  let hasData = false;
+  MEALS.forEach(({ key, label }) => {
+    const c = (diet.carbs?.[key] || '—').slice(0,col1).padEnd(col1);
+    const p = (diet.proteins?.[key] || '—').slice(0,col2).padEnd(col2);
+    if ((diet.carbs?.[key] || diet.proteins?.[key])) hasData = true;
+    lines.push(`${label.padEnd(col0)} ${c} ${p}`);
+  });
+  lines.push(sep);
+  if (diet.extraLiberta) lines.push(`Grassi / extra: ${diet.extraLiberta}`);
+  if (!hasData) return '(dieta salvata ma campi vuoti — compilare la sezione "La mia dieta")';
+  return lines.join('\n');
+}
+
+function parseSchedaFromAI(raw) {
+  const days = parseSchedaFromText(raw);
+  return { analysis: raw, days };
+}
+
+// ─── Photo helpers ─────────────────────────────────────────────────────────
+const photoData = { front: null, side: null, back: null };
+
+['front','side','back'].forEach(side => {
+  const inp = document.getElementById('photo-'+side+'-input');
+  inp?.addEventListener('change', () => {
+    const file = inp.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const cell = document.getElementById('photo-'+side+'-cell');
+      // replace svg + label with img
+      let img = cell.querySelector('img');
+      if (!img) { img = document.createElement('img'); cell.insertBefore(img, cell.querySelector('.ph-label')); }
+      img.src = ev.target.result;
+      cell.querySelector('.ph-label').textContent = side.charAt(0).toUpperCase()+side.slice(1);
+      photoData[side] = { src: ev.target.result, type: file.type };
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+function removePhoto(side, evt) {
+  evt.stopPropagation();
+  const cell = document.getElementById('photo-'+side+'-cell');
+  const img = cell.querySelector('img');
+  if (img) img.remove();
+  const inp = document.getElementById('photo-'+side+'-input');
+  if (inp) inp.value = '';
+  photoData[side] = null;
+}
+
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = e => res(e.target.result.split(',')[1]);
+    reader.onerror = rej;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ─── Coach panel refresh ─────────────────────────────────────────────────────
+async function refreshCoachPanel() {
+  const schede = await getSchedeForUser();
+  const hasScheda = schede.length > 0;
+  document.getElementById('coach-no-scheda').classList.toggle('active', !hasScheda);
+  document.getElementById('coach-has-scheda').classList.toggle('active', hasScheda);
+  document.getElementById('coach-prompt-box').style.display = 'none';
+  document.getElementById('coach-import-response').style.display = 'none';
+  document.querySelectorAll('.coach-step-pill').forEach((p,i) => p.classList.toggle('active', i === 0));
+  if (hasScheda) prefillStrengthRows();
+}
+
+// ─── Navigation ─────────────────────────────────────────────────────────────
+function navigate(panelId) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav a, .nav-mobile a').forEach(x => x.classList.remove('active'));
+  document.getElementById('panel-'+panelId)?.classList.add('active');
+  document.querySelectorAll('[data-panel="'+panelId+'"]').forEach(x => x.classList.add('active'));
+  if (panelId === 'coach') refreshCoachPanel();
+}
+
+document.querySelectorAll('.nav a, .nav-mobile a').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const id = a.getAttribute('data-panel');
+    if (id) navigate(id);
+  });
+});
+
+// ─── Users ─────────────────────────────────────────────────────────────────
+async function renderUserList() {
+  const list = document.getElementById('user-list');
+  const empty = document.getElementById('user-list-empty');
+  const users = await getUsers();
+  const currentId = getCurrentUserId();
+  list.innerHTML = '';
+  if (!users.length) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  users.forEach(u => {
+    const li = document.createElement('li');
+    li.className = u.id === currentId ? 'current' : '';
+    li.innerHTML = `<span class="name">${escHtml(u.name)}</span><div class="actions">${u.id!==currentId?`<button type="button" data-select="${u.id}">Usa</button>`:''}<button type="button" data-delete="${u.id}">Elimina</button></div>`;
+    list.appendChild(li);
+  });
+  list.querySelectorAll('[data-select]').forEach(btn => btn.addEventListener('click', async () => {
+    setCurrentUserId(btn.getAttribute('data-select'));
+    await reloadAll();
+  }));
+  list.querySelectorAll('[data-delete]').forEach(btn => btn.addEventListener('click', async () => {
+    const id = btn.getAttribute('data-delete');
+    if (!confirm('Eliminare questo utente?')) return;
+    const users = (await getUsers()).filter(u => u.id!==id);
+    await saveUsers(users);
+    await idbDelete('profiles', id);
+    await idbDelete('diet', id);
+    await idbDelete('progress', id);
+    // delete all schede and diete for user
+    const all = await idbGetAll('schede');
+    for (const s of all.filter(s=>s.userId===id)) await idbDelete('schede', [s.userId,s.versionId]);
+    const allDiete = await idbGetAll('diete');
+    for (const d of allDiete.filter(d=>d.userId===id)) await idbDelete('diete', [d.userId,d.versionId]);
+    if (getCurrentUserId()===id) { setCurrentUserId(users[0]?.id||null); await reloadAll(); }
+    await renderUserList();
+    updateCurrentUserName();
+  }));
+}
+
+async function updateCurrentUserName() {
+  const u = await getCurrentUser();
+  document.getElementById('current-user-name').textContent = u ? u.name : '—';
+}
+
+document.getElementById('form-add-user').addEventListener('submit', async e => {
+  e.preventDefault();
+  const name = document.getElementById('new-user-name').value.trim();
+  if (!name) return;
+  const id = 'u_'+Date.now();
+  const users = await getUsers();
+  users.push({ id, name, createdAt: new Date().toISOString() });
+  await saveUsers(users);
+  setCurrentUserId(id);
+  document.getElementById('new-user-name').value = '';
+  await reloadAll();
+});
+
+// ─── Profile ─────────────────────────────────────────────────────────────────
+async function loadProfile() {
+  const p = await getUserData('profiles');
+  if (!p) { document.getElementById('form-profile')?.reset(); return; }
+  ['sex','age','height','weight','weight-prev','waist','level','days-weights','days-cardio'].forEach(k => {
+    const el = document.getElementById('profile-'+k);
+    if (el) el.value = p[k.replace('-','')] ?? p[k] ?? '';
+  });
+  document.getElementById('profile-sex').value = p.sex||'';
+  document.getElementById('profile-age').value = p.age??'';
+  document.getElementById('profile-height').value = p.height??'';
+  document.getElementById('profile-weight').value = p.weight??'';
+  document.getElementById('profile-weight-prev').value = p.previousWeight??'';
+  document.getElementById('profile-waist').value = p.waist??'';
+  document.getElementById('profile-level').value = p.level||'';
+  document.getElementById('profile-days-weights').value = p.daysWeights??'';
+  document.getElementById('profile-days-cardio').value = p.daysCardio??'';
+}
+
+document.getElementById('form-profile').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!getCurrentUserId()) { alert('Seleziona un utente prima.'); return; }
+  await setUserData('profiles', {
+    sex: document.getElementById('profile-sex').value,
+    age: document.getElementById('profile-age').value||null,
+    height: document.getElementById('profile-height').value||null,
+    weight: document.getElementById('profile-weight').value||null,
+    previousWeight: document.getElementById('profile-weight-prev').value||null,
+    waist: document.getElementById('profile-waist').value||null,
+    level: document.getElementById('profile-level').value,
+    daysWeights: document.getElementById('profile-days-weights').value||null,
+    daysCardio: document.getElementById('profile-days-cardio').value||null,
+  });
+  showToast('Profilo salvato.');
+});
+
+// ─── Diet ─────────────────────────────────────────────────────────────────────
+const MEAL_KEYS = ['colazione','spuntino1','pranzo','spuntino2','cena','extra'];
+
+function clearDietForm() {
+  MEAL_KEYS.forEach(k => {
+    const c = document.getElementById('diet-carbs-'+k);
+    const pr = document.getElementById('diet-proteins-'+k);
+    if (c) c.value = '';
+    if (pr) pr.value = '';
+  });
+  const ex = document.getElementById('diet-extra-liberta');
+  if (ex) ex.value = '';
+}
+
+function fillDietForm(d) {
+  MEAL_KEYS.forEach(k => {
+    const c = document.getElementById('diet-carbs-'+k);
+    const pr = document.getElementById('diet-proteins-'+k);
+    if (c) c.value = d?.carbs?.[k] || '';
+    if (pr) pr.value = d?.proteins?.[k] || '';
+  });
+  const ex = document.getElementById('diet-extra-liberta');
+  if (ex) ex.value = d?.extraLiberta || '';
+}
+
+async function renderDietaTabs() {
+  const tabsEl = document.getElementById('dieta-tabs');
+  const delBtn = document.getElementById('btn-del-dieta');
+  tabsEl.innerHTML = '';
+  const diete = await getDieteForUser();
+  if (diete.length === 0) {
+    activeDietVersionId = null;
+    tabsEl.innerHTML = '<span style="color:var(--text-muted);font-size:.85rem">Nessuna dieta salvata. Crea una versione, compila e salva.</span>';
+    clearDietForm();
+    if (delBtn) delBtn.style.display = 'none';
+    return;
+  }
+  if (!activeDietVersionId || !diete.find(d => d.versionId === activeDietVersionId)) {
+    activeDietVersionId = diete[diete.length-1].versionId;
+  }
+  diete.forEach(d => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'scheda-tab' + (d.versionId === activeDietVersionId ? ' active' : '');
+    btn.textContent = d.label;
+    btn.addEventListener('click', async () => {
+      activeDietVersionId = d.versionId;
+      await loadDietFromVersion(d.versionId);
+      await renderDietaTabs();
+    });
+    tabsEl.appendChild(btn);
+  });
+  if (delBtn) delBtn.style.display = diete.length > 0 ? '' : 'none';
+}
+
+async function loadDietFromVersion(vId) {
+  const id = getCurrentUserId();
+  if (!id) return;
+  const d = await idbGet('diete', [id, vId]);
+  clearDietForm();
+  if (d) fillDietForm(d);
+}
+
+async function loadDiet() {
+  const diete = await getDieteForUser();
+
+  // One-time migration: if old single-record diet exists and no diete versions yet
+  if (diete.length === 0) {
+    const legacy = await getUserData('diet');
+    if (legacy && (legacy.carbs || legacy.proteins || legacy.extraLiberta)) {
+      await createNewDietaVersion({
+        carbs: legacy.carbs || {},
+        proteins: legacy.proteins || {},
+        extraLiberta: legacy.extraLiberta || ''
+      }, 'Dieta 1');
+    }
+  }
+
+  const updated = await getDieteForUser();
+  if (updated.length > 0) {
+    if (!activeDietVersionId || !updated.find(d => d.versionId === activeDietVersionId)) {
+      activeDietVersionId = updated[updated.length-1].versionId;
+    }
+    await loadDietFromVersion(activeDietVersionId);
+  } else {
+    clearDietForm();
+  }
+  await renderDietaTabs();
+}
+
+document.getElementById('form-diet').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!getCurrentUserId()) { alert('Seleziona un utente prima.'); return; }
+  const carbs={}, proteins={};
+  MEAL_KEYS.forEach(k => {
+    carbs[k] = document.getElementById('diet-carbs-'+k)?.value.trim()||'';
+    proteins[k] = document.getElementById('diet-proteins-'+k)?.value.trim()||'';
+  });
+  const extraLiberta = document.getElementById('diet-extra-liberta').value.trim();
+
+  if (!activeDietVersionId) {
+    // No version yet — create first one
+    await createNewDietaVersion({ carbs, proteins, extraLiberta }, 'Dieta 1');
+  } else {
+    await saveDieta({ carbs, proteins, extraLiberta, lastUpdated: new Date().toISOString() });
+  }
+  await renderDietaTabs();
+  showToast('Dieta salvata.');
+});
+
+document.getElementById('btn-new-dieta')?.addEventListener('click', async () => {
+  if (!getCurrentUserId()) { alert('Seleziona un utente prima.'); return; }
+  const diete = await getDieteForUser();
+  const label = 'Dieta ' + (diete.length + 1);
+  await createNewDietaVersion({}, label);
+  clearDietForm();
+  await renderDietaTabs();
+});
+
+document.getElementById('btn-del-dieta')?.addEventListener('click', async () => {
+  const diete = await getDieteForUser();
+  if (diete.length === 0) return;
+  const cur = diete.find(d => d.versionId === activeDietVersionId);
+  if (!confirm(`Eliminare "${cur?.label || 'questa versione'}"? L'operazione non è reversibile.`)) return;
+  await deleteActiveDieta();
+  await loadDiet();
+});
+
+// ─── Diet import from AI ──────────────────────────────────────────────────────
+function dietObjToFields(dietObj) {
+  const KEYS = ['colazione','spuntino1','pranzo','spuntino2','cena','extra'];
+  const carbs = {}, proteins = {};
+  KEYS.forEach(k => {
+    carbs[k] = dietObj[k]?.carbs || dietObj[k]?.carboidrati || '';
+    const p = dietObj[k]?.proteins || dietObj[k]?.proteine || '';
+    const f = dietObj[k]?.fats || dietObj[k]?.grassi || '';
+    proteins[k] = [p, f].filter(Boolean).join(' | ');
+  });
+  const noteParts = [dietObj.extra?.fats, dietObj.note].filter(Boolean);
+  const extraLiberta = noteParts.join(' — ');
+  return { carbs, proteins, extraLiberta };
+}
+
+function applyDietToForm(dietObj) {
+  const { carbs, proteins, extraLiberta } = dietObjToFields(dietObj);
+  const KEYS = ['colazione','spuntino1','pranzo','spuntino2','cena','extra'];
+  KEYS.forEach(k => {
+    const cEl = document.getElementById('diet-carbs-'+k);
+    const pEl = document.getElementById('diet-proteins-'+k);
+    if (cEl && carbs[k]) cEl.value = carbs[k];
+    if (pEl && proteins[k]) pEl.value = proteins[k];
+  });
+  if (extraLiberta) {
+    const el = document.getElementById('diet-extra-liberta');
+    if (el) el.value = extraLiberta;
+  }
+}
+
+async function applyAndSaveDietFromAI(dietObj, label) {
+  const { carbs, proteins, extraLiberta } = dietObjToFields(dietObj);
+  applyDietToForm(dietObj);
+  if (!activeDietVersionId) {
+    await createNewDietaVersion({ carbs, proteins, extraLiberta, lastUpdated: new Date().toISOString() }, label || 'Dieta 1');
+  } else {
+    // Always create a new version when importing from AI
+    const diete = await getDieteForUser();
+    const lbl = label || ('Dieta ' + (diete.length + 1));
+    await createNewDietaVersion({ carbs, proteins, extraLiberta, lastUpdated: new Date().toISOString() }, lbl);
+  }
+  await renderDietaTabs();
+}
+
+document.getElementById('btn-import-diet')?.addEventListener('click', async () => {
+  if (!getCurrentUserId()) { alert('Seleziona un utente prima.'); return; }
+  const raw = document.getElementById('diet-import-text').value.trim();
+  const statusEl = document.getElementById('diet-import-status');
+  if (!raw) { setStatus(statusEl, 'err', 'Incolla prima il testo dell\'AI.'); return; }
+
+  // Try json-diet block first
+  const jsonDietMatch = raw.match(/```json-diet\n?([\s\S]*?)```/);
+  if (jsonDietMatch) {
+    try {
+      const dietObj = JSON.parse(jsonDietMatch[1].trim());
+      await applyAndSaveDietFromAI(dietObj);
+      setStatus(statusEl, 'ok', 'Nuova versione dieta salvata dal blocco JSON. Vai in "La mia dieta" per vedere.');
+      return;
+    } catch(_) {}
+  }
+
+  // Try bare JSON object
+  const bareJson = raw.match(/(\{[\s\S]*\})/);
+  if (bareJson) {
+    try {
+      const dietObj = JSON.parse(bareJson[1]);
+      if (dietObj.colazione || dietObj.pranzo || dietObj.cena) {
+        await applyAndSaveDietFromAI(dietObj);
+        setStatus(statusEl, 'ok', 'Nuova versione dieta salvata dal JSON. Vai in "La mia dieta" per vedere.');
+        return;
+      }
+    } catch(_) {}
+  }
+
+  // Plain text fallback: parse meal sections
+  const MEAL_MAP = {
+    'colazione': 'colazione', 'breakfast': 'colazione',
+    'spuntino 1': 'spuntino1', 'spuntino mattina': 'spuntino1', 'snack mattina': 'spuntino1',
+    'pranzo': 'pranzo', 'lunch': 'pranzo',
+    'spuntino 2': 'spuntino2', 'spuntino pomeriggio': 'spuntino2', 'snack pomeriggio': 'spuntino2',
+    'cena': 'cena', 'dinner': 'cena',
+    'extra': 'extra'
+  };
+  const lines = raw.split('\n');
+  let currentKey = null;
+  let filled = 0;
+  const parsedCarbs = {}, parsedProteins = {};
+  MEAL_KEYS.forEach(k => { parsedCarbs[k] = ''; parsedProteins[k] = ''; });
+  lines.forEach(line => {
+    const low = line.toLowerCase().replace(/[:\-–•*#]+/g,'').trim();
+    for (const [lbl, key] of Object.entries(MEAL_MAP)) {
+      if (low.startsWith(lbl)) {
+        currentKey = key;
+        const content = line.replace(new RegExp(lbl, 'i'), '').replace(/[:\-–]+/, '').trim();
+        if (content) { parsedCarbs[key] = content; filled++; }
+        return;
+      }
+    }
+    if (currentKey && line.trim() && !line.trim().startsWith('#') && !parsedCarbs[currentKey]) {
+      parsedCarbs[currentKey] = line.trim(); filled++;
+    }
+  });
+  if (filled > 0) {
+    const synth = {};
+    MEAL_KEYS.forEach(k => { if (parsedCarbs[k]) synth[k] = { carbs: parsedCarbs[k], proteins: '' }; });
+    await applyAndSaveDietFromAI(synth);
+    setStatus(statusEl, 'ok', `${filled} pasto/i trovati — nuova versione dieta creata. Controlla e integra i campi proteine.`);
+  } else {
+    setStatus(statusEl, 'err', 'Non ho trovato pasti riconoscibili. Assicurati che l\'AI abbia usato parole come "Colazione:", "Pranzo:", "Cena:" o il blocco json-diet.');
+  }
+});
+
+// ─── Progress ─────────────────────────────────────────────────────────────────
+async function getProgressList() {
+  const d = await getUserData('progress');
+  return Array.isArray(d?.entries) ? d.entries : [];
+}
+function saveProgressList(list) { return setUserData('progress', { entries: list }); }
+
+let _chartRangeDays = null; // null = tutto
+
+function drawProgressChart(list) {
+  const card = document.getElementById('progress-chart-card');
+  const canvas = document.getElementById('progress-chart');
+  const statsEl = document.getElementById('progress-chart-stats');
+  if (!list.length) { card.style.display = 'none'; return; }
+  card.style.display = '';
+
+  const sorted = list.slice().sort((a, b) => new Date(a.date) - new Date(b.date));
+  const filtered = _chartRangeDays
+    ? sorted.filter(e => (Date.now() - new Date(e.date)) / 86400000 <= _chartRangeDays)
+    : sorted;
+  if (!filtered.length) { card.style.display = 'none'; return; }
+
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.parentElement.clientWidth || 600;
+  const H = 220;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const pad = { top: 18, right: 16, bottom: 36, left: 48 };
+  const cW = W - pad.left - pad.right;
+  const cH = H - pad.top - pad.bottom;
+
+  const weights = filtered.map(e => parseFloat(e.weight));
+  const minW = Math.min(...weights);
+  const maxW = Math.max(...weights);
+  const range = maxW - minW || 1;
+  const yMin = Math.floor(minW - range * 0.15);
+  const yMax = Math.ceil(maxW + range * 0.15);
+  const yRange = yMax - yMin;
+
+  const xOf = i => pad.left + (i / (filtered.length - 1 || 1)) * cW;
+  const yOf = v => pad.top + cH - ((v - yMin) / yRange) * cH;
+
+  // grid & y-axis labels
+  ctx.strokeStyle = '#2f2f41';
+  ctx.lineWidth = 1;
+  const steps = 4;
+  ctx.font = '11px DM Sans,-apple-system,sans-serif';
+  ctx.fillStyle = '#8888a0';
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= steps; i++) {
+    const v = yMin + (yRange / steps) * i;
+    const y = yOf(v);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + cW, y); ctx.stroke();
+    ctx.fillText(v.toFixed(1), pad.left - 6, y + 4);
+  }
+
+  // x-axis date labels (max 6 evenly spaced)
+  ctx.textAlign = 'center';
+  const step = Math.max(1, Math.floor(filtered.length / 6));
+  for (let i = 0; i < filtered.length; i += step) {
+    const x = xOf(i);
+    const d = filtered[i].date.slice(5); // MM-DD
+    ctx.fillText(d, x, H - pad.bottom + 16);
+  }
+  // always show last
+  if ((filtered.length - 1) % step !== 0) {
+    const x = xOf(filtered.length - 1);
+    ctx.fillText(filtered[filtered.length - 1].date.slice(5), x, H - pad.bottom + 16);
+  }
+
+  // gradient fill under line
+  if (filtered.length > 1) {
+    const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + cH);
+    grad.addColorStop(0, 'rgba(34,197,94,0.25)');
+    grad.addColorStop(1, 'rgba(34,197,94,0)');
+    ctx.beginPath();
+    ctx.moveTo(xOf(0), yOf(weights[0]));
+    for (let i = 1; i < filtered.length; i++) ctx.lineTo(xOf(i), yOf(weights[i]));
+    ctx.lineTo(xOf(filtered.length - 1), pad.top + cH);
+    ctx.lineTo(xOf(0), pad.top + cH);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+  }
+
+  // line
+  ctx.beginPath();
+  ctx.strokeStyle = '#22c55e';
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  filtered.forEach((e, i) => {
+    const x = xOf(i), y = yOf(parseFloat(e.weight));
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // dots
+  filtered.forEach((e, i) => {
+    const x = xOf(i), y = yOf(parseFloat(e.weight));
+    ctx.beginPath();
+    ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#22c55e';
+    ctx.fill();
+    ctx.strokeStyle = '#0f0f12';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  });
+
+  // stats
+  const first = weights[0], last = weights[weights.length - 1];
+  const delta = last - first;
+  const sign = delta > 0 ? '+' : '';
+  statsEl.innerHTML = `
+    <div><span style="color:var(--text-muted);font-size:.8rem">Inizio</span><br><strong>${first.toFixed(1)} kg</strong></div>
+    <div><span style="color:var(--text-muted);font-size:.8rem">Attuale</span><br><strong>${last.toFixed(1)} kg</strong></div>
+    <div><span style="color:var(--text-muted);font-size:.8rem">Variazione</span><br><strong style="color:${delta <= 0 ? 'var(--accent)' : 'var(--orange)'}">${sign}${delta.toFixed(1)} kg</strong></div>
+    <div><span style="color:var(--text-muted);font-size:.8rem">Rilevazioni</span><br><strong>${filtered.length}</strong></div>
+    ${filtered.find(e=>e.waist) ? `<div><span style="color:var(--text-muted);font-size:.8rem">Ultima vita</span><br><strong>${[...filtered].reverse().find(e=>e.waist)?.waist} cm</strong></div>` : ''}
+  `;
+}
+
+async function loadProgress() {
+  const list = await getProgressList();
+  const tbody = document.getElementById('progress-tbody');
+  const empty = document.getElementById('progress-empty');
+  const tableEl = document.getElementById('progress-table-el');
+  tbody.innerHTML = '';
+  if (!list.length) {
+    empty.style.display = 'block';
+    tableEl.style.display = 'none';
+    drawProgressChart([]);
+    return;
+  }
+  empty.style.display = 'none';
+  tableEl.style.display = '';
+  drawProgressChart(list);
+  list.slice().sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(entry => {
+    const idx = list.indexOf(entry);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${escHtml(entry.date)}</td><td>${escHtml(String(entry.weight))}</td><td>${entry.waist || '—'}</td><td>${escHtml(entry.note || '')}</td><td class="del-cell"><button type="button" data-index="${idx}">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('[data-index]').forEach(btn => btn.addEventListener('click', async () => {
+    const list = await getProgressList();
+    list.splice(parseInt(btn.getAttribute('data-index')), 1);
+    await saveProgressList(list);
+    await loadProgress();
+  }));
+}
+
+document.getElementById('form-progress').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!getCurrentUserId()) { alert('Seleziona un utente prima.'); return; }
+  const list = await getProgressList();
+  list.push({
+    date: document.getElementById('progress-date').value || new Date().toISOString().slice(0, 10),
+    weight: document.getElementById('progress-weight').value,
+    waist: document.getElementById('progress-waist').value || null,
+    note: document.getElementById('progress-note').value.trim() || null
+  });
+  await saveProgressList(list);
+  document.getElementById('progress-weight').value = '';
+  document.getElementById('progress-waist').value = '';
+  document.getElementById('progress-note').value = '';
+  await loadProgress();
+});
+document.getElementById('progress-date').value = new Date().toISOString().slice(0, 10);
+
+document.querySelectorAll('.chart-range-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    document.querySelectorAll('.chart-range-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const r = btn.getAttribute('data-range');
+    _chartRangeDays = r === 'all' ? null : parseInt(r);
+    const list = await getProgressList();
+    drawProgressChart(list);
+  });
+});
+
+let _chartResizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(_chartResizeTimer);
+  _chartResizeTimer = setTimeout(async () => {
+    const list = await getProgressList();
+    if (list.length) drawProgressChart(list);
+  }, 200);
+});
+
+// ─── Export ───────────────────────────────────────────────────────────────────
+document.getElementById('btn-generate-export').addEventListener('click', async () => {
+  if (!getCurrentUserId()) { alert('Seleziona un utente prima.'); return; }
+  const box = document.getElementById('export-box');
+  box.textContent = await buildExportText();
+  box.classList.add('highlight');
+  document.getElementById('btn-copy-export').style.display = 'inline-flex';
+});
+document.getElementById('btn-copy-export').addEventListener('click', () => {
+  const text = document.getElementById('export-box').textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    document.getElementById('copy-hint').style.display = 'block';
+    setTimeout(() => document.getElementById('copy-hint').style.display='none', 2000);
+  });
+});
+
+async function buildExportText() {
+  const p = await getUserData('profiles');
+  const d = await getActiveDieta();
+  const scheda = await getActiveScheda();
+  const progress = await getProgressList();
+  const meals = ['Colazione','Spuntino 1','Pranzo','Spuntino 2','Cena','Extra'];
+  let t = 'Sei il mio personal trainer online. Analizza i miei dati e dammi consigli pratici su allenamento e alimentazione.\n\n';
+  t += '--- PROFILO ---\n';
+  if (p) {
+    t += `Sesso: ${p.sex||'—'} | Età: ${p.age||'—'} | Altezza: ${p.height||'—'} cm | Peso: ${p.weight||'—'} kg\n`;
+    t += `Livello: ${p.level||'—'} | Pesi: ${p.daysWeights||'—'}g/sett | Cardio: ${p.daysCardio||'—'}g/sett\n`;
+  }
+  t += '\n--- DIETA ---\n';
+  if (d?.carbs || d?.proteins) {
+    MEAL_KEYS.forEach((k,i) => {
+      const c = d.carbs?.[k]||'—'; const pr = d.proteins?.[k]||'—';
+      t += `${meals[i]} – Carb: ${c} | Prot: ${pr}\n`;
+    });
+    if (d.extraLiberta) t += `Altro: ${d.extraLiberta}\n`;
+  } else t += '(nessuna dieta)\n';
+  t += '\n--- SCHEDA ---\n';
+  t += formatSchedaForPrompt(scheda) + '\n';
+  if (progress.length) {
+    t += '\n--- PROGRESSI (ultimi 10) ---\n';
+    progress.slice().sort((a,b) => new Date(b.date)-new Date(a.date)).slice(0,10).forEach(e => {
+      t += `${e.date} – ${e.weight} kg${e.waist?', vita '+e.waist+' cm':''}${e.note?' – '+e.note:''}\n`;
+    });
+  }
+  t += '\n(Allega foto progressi se le hai.)\n';
+  return t;
+}
+
+// ─── Settings UI ─────────────────────────────────────────────────────────────
+async function loadSettings() {
+  const s = await getSettings();
+  const hevyInp = document.getElementById('settings-hevy-key');
+  if (hevyInp && s.hevyKey) hevyInp.value = s.hevyKey;
+  if (s.geminiKey) { const el = document.getElementById('settings-gemini-key'); if(el) el.value = s.geminiKey; }
+  if (s.groqKey)   { const el = document.getElementById('settings-groq-key');   if(el) el.value = s.groqKey; }
+  if (s.apiKey)    { const el = document.getElementById('settings-api-key');     if(el) el.value = s.apiKey; }
+  if (s.ollamaModel){ const el = document.getElementById('settings-ollama-model'); if(el) el.value = s.ollamaModel; }
+  if (s.ollamaUrl)  { const el = document.getElementById('settings-ollama-url');   if(el) el.value = s.ollamaUrl; }
+}
+
+function updateProviderBlocks() {}
+
+function showAiKeyStatus(msg) {
+  const el = document.getElementById('ai-keys-status');
+  if (!el) return;
+  el.className = 'api-key-status ok'; el.textContent = msg;
+  setTimeout(() => { el.textContent = ''; }, 2500);
+}
+
+document.getElementById('btn-save-gemini-key')?.addEventListener('click', async () => {
+  await saveSettings({ geminiKey: document.getElementById('settings-gemini-key').value.trim() });
+  showAiKeyStatus('Chiave Gemini salvata.');
+});
+document.getElementById('btn-save-groq-key')?.addEventListener('click', async () => {
+  await saveSettings({ groqKey: document.getElementById('settings-groq-key').value.trim() });
+  showAiKeyStatus('Chiave Groq salvata.');
+});
+document.getElementById('btn-save-api-key')?.addEventListener('click', async () => {
+  await saveSettings({ apiKey: document.getElementById('settings-api-key').value.trim() });
+  showAiKeyStatus('Chiave OpenAI salvata.');
+});
+document.getElementById('btn-save-ollama')?.addEventListener('click', async () => {
+  await saveSettings({
+    ollamaModel: document.getElementById('settings-ollama-model').value.trim() || 'llama3.2',
+    ollamaUrl: document.getElementById('settings-ollama-url').value.trim() || 'http://localhost:11434'
+  });
+  showAiKeyStatus('Configurazione Ollama salvata.');
+});
+
+document.getElementById('btn-save-hevy-key').addEventListener('click', async () => {
+  const key = document.getElementById('settings-hevy-key').value.trim();
+  await saveSettings({ hevyKey: key });
+  const el = document.getElementById('hevy-key-status');
+  el.className = 'api-key-status ok'; el.textContent = 'Chiave Hevy salvata.';
+  setTimeout(() => { el.textContent=''; }, 2500);
+});
+
+document.getElementById('btn-export-data').addEventListener('click', async () => {
+  const users = await getUsers();
+  const data = { exportedAt: new Date().toISOString(), users };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'robcoach-backup.json';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// ─── Hevy API ─────────────────────────────────────────────────────────────────
+const HEVY_BASE = 'https://api.hevyapp.com';
+let hevyCurrentItems = [];
+
+async function hevyFetch(path) {
+  const key = await getHevyApiKey();
+  if (!key) throw new Error('Nessuna Hevy API key. Vai in Impostazioni.');
+  const resp = await fetch(HEVY_BASE + path, {
+    headers: { 'api-key': key, 'Accept': 'application/json' }
+  });
+  if (!resp.ok) {
+    if (resp.status === 401) throw new Error('Hevy API key non valida o account non Pro.');
+    throw new Error('Hevy HTTP ' + resp.status);
+  }
+  return resp.json();
+}
+
+// Import tab toggle
+document.querySelectorAll('.import-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.import-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.importTab;
+    document.getElementById('import-tab-file').style.display = tab === 'file' ? '' : 'none';
+    document.getElementById('import-tab-paste').style.display = tab === 'paste' ? '' : 'none';
+    document.getElementById('import-tab-csv').style.display = tab === 'csv' ? '' : 'none';
+    document.getElementById('import-tab-hevy').style.display = tab === 'hevy' ? '' : 'none';
+  });
+});
+
+// ─── CSV Import ───────────────────────────────────────────────────────────────
+let _csvParsedRows = [];
+
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
+  if (!lines.length) return [];
+  // detect separator: comma or semicolon
+  const sep = lines[0].includes(';') ? ';' : ',';
+  const parseLine = line => {
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') { inQ = !inQ; continue; }
+      if (ch === sep && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else cur += ch;
+    }
+    cols.push(cur.trim());
+    return cols;
+  };
+  const headers = parseLine(lines[0]).map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
+  const idxOf = (...keys) => { for (const k of keys) { const i = headers.findIndex(h => h.includes(k)); if (i !== -1) return i; } return -1; };
+  const iEx  = idxOf('esercizio', 'exercise', 'name', 'nome');
+  const iGrp = idxOf('gruppo', 'group', 'muscolo', 'muscle');
+  const iSet = idxOf('serie', 'sets', 'set');
+  const iRep = idxOf('ripetizioni', 'reps', 'rep');
+  const iWgt = idxOf('peso', 'weight', 'carico');
+  const iAlt = idxOf('alternativa', 'alternative');
+  const iRec = idxOf('recupero', 'recovery', 'rest');
+  const iNote= idxOf('note', 'notes', 'comment');
+  if (iEx === -1) return null; // no exercise column
+  return lines.slice(1).map(line => {
+    const c = parseLine(line);
+    const g = (iGrp !== -1 ? c[iGrp] : '') || '';
+    return {
+      gruppo:   g,
+      exercise: iEx  !== -1 ? c[iEx]  || '' : '',
+      sets:     iSet !== -1 ? c[iSet]  || '' : '',
+      reps:     iRep !== -1 ? c[iRep]  || '' : '',
+      weight:   iWgt !== -1 ? c[iWgt]  || '' : '',
+      alternative: iAlt !== -1 ? c[iAlt] || '' : '',
+      recupero: iRec !== -1 ? c[iRec]  || '' : '',
+      note:     iNote!== -1 ? c[iNote] || '' : '',
+    };
+  }).filter(r => r.exercise.trim());
+}
+
+function renderCSVPreview(rows) {
+  const wrap = document.getElementById('csv-preview-table');
+  if (!rows.length) { wrap.innerHTML = '<p style="padding:.75rem;font-size:.85rem;color:var(--text-muted)">Nessuna riga trovata.</p>'; return; }
+  let html = '<table style="width:100%;border-collapse:collapse;font-size:.82rem">';
+  html += '<thead><tr style="border-bottom:1px solid var(--border)">';
+  ['Gruppo','Esercizio','Serie','Rep','Peso','Recupero','Note'].forEach(h => {
+    html += `<th style="padding:.4rem .5rem;text-align:left;color:var(--text-muted);font-weight:500;white-space:nowrap">${h}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+  rows.forEach(r => {
+    html += `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:.35rem .5rem;color:var(--accent);font-size:.78rem">${escHtml(r.gruppo)}</td>
+      <td style="padding:.35rem .5rem;font-weight:500">${escHtml(r.exercise)}</td>
+      <td style="padding:.35rem .5rem">${escHtml(r.sets)}</td>
+      <td style="padding:.35rem .5rem">${escHtml(r.reps)}</td>
+      <td style="padding:.35rem .5rem">${escHtml(r.weight)}</td>
+      <td style="padding:.35rem .5rem">${escHtml(r.recupero)}</td>
+      <td style="padding:.35rem .5rem;color:var(--text-muted);max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(r.note)}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function handleCSVFile(file) {
+  const statusEl = document.getElementById('csv-import-status');
+  if (!file) return;
+  if (!file.name.endsWith('.csv') && file.type !== 'text/csv') {
+    setStatus(statusEl, 'err', 'Seleziona un file .csv valido.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result;
+    const rows = parseCSV(text);
+    if (rows === null) {
+      setStatus(statusEl, 'err', 'Colonna "Esercizio" non trovata. Controlla le intestazioni del CSV.');
+      return;
+    }
+    if (!rows.length) {
+      setStatus(statusEl, 'err', 'Nessun esercizio trovato nel file.');
+      return;
+    }
+    _csvParsedRows = rows;
+    document.getElementById('csv-preview-label').textContent = `${rows.length} esercizi trovati in "${file.name}"`;
+    renderCSVPreview(rows);
+    document.getElementById('csv-preview').style.display = '';
+    statusEl.style.display = 'none';
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// file input change
+document.getElementById('csv-file-input').addEventListener('change', e => {
+  handleCSVFile(e.target.files[0]);
+});
+
+// drag & drop
+const csvDropArea = document.getElementById('csv-drop-area');
+csvDropArea.addEventListener('dragover', e => { e.preventDefault(); csvDropArea.classList.add('drag'); });
+csvDropArea.addEventListener('dragleave', () => csvDropArea.classList.remove('drag'));
+csvDropArea.addEventListener('drop', e => {
+  e.preventDefault();
+  csvDropArea.classList.remove('drag');
+  handleCSVFile(e.dataTransfer.files[0]);
+});
+
+// import button
+document.getElementById('btn-csv-import').addEventListener('click', () => {
+  const statusEl = document.getElementById('csv-import-status');
+  if (!_csvParsedRows.length) { setStatus(statusEl, 'err', 'Carica prima un file CSV.'); return; }
+  const target = document.getElementById('csv-target-day').value;
+
+  if (target === 'auto') {
+    // group by "Gruppo" column → assign each distinct group to a day
+    const groups = [];
+    _csvParsedRows.forEach(r => {
+      const g = r.gruppo.trim() || 'Giornata 1';
+      if (!groups.find(x => x.name === g)) groups.push({ name: g, rows: [] });
+      groups.find(x => x.name === g).rows.push(r);
+    });
+    const days = Math.min(groups.length, 4);
+    for (let i = 0; i < days; i++) {
+      const dayNum = i + 1;
+      const nameEl = document.getElementById('workout-day' + dayNum + '-name');
+      if (nameEl && !nameEl.value.trim()) nameEl.value = groups[i].name;
+      const tbody = document.getElementById('workout-day' + dayNum + '-tbody');
+      if (tbody) {
+        tbody.innerHTML = '';
+        groups[i].rows.forEach(r => {
+          const altNote = [r.alternative, r.note].filter(Boolean).join(' | ');
+          tbody.appendChild(makeExerciseRow({
+            exercise: r.exercise,
+            sets: r.sets,
+            reps: r.reps,
+            weight: r.weight,
+            alternative: altNote
+          }));
+        });
+      }
+    }
+    renderWorkoutPreview();
+    setStatus(statusEl, 'ok', `Importati ${_csvParsedRows.length} esercizi su ${days} giornata/e. Controlla i blocchi e salva.`);
+  } else {
+    const dayNum = parseInt(target);
+    const tbody = document.getElementById('workout-day' + dayNum + '-tbody');
+    if (!tbody) { setStatus(statusEl, 'err', 'Giornata non trovata.'); return; }
+    tbody.innerHTML = '';
+    _csvParsedRows.forEach(r => {
+      const altNote = [r.alternative, r.note].filter(Boolean).join(' | ');
+      tbody.appendChild(makeExerciseRow({
+        exercise: r.exercise,
+        sets: r.sets,
+        reps: r.reps,
+        weight: r.weight,
+        alternative: altNote
+      }));
+    });
+    renderWorkoutPreview();
+    setStatus(statusEl, 'ok', `Importati ${_csvParsedRows.length} esercizi nella Giornata ${dayNum}. Controlla il blocco e salva.`);
+  }
+});
+
+document.getElementById('btn-import-paste').addEventListener('click', () => {
+  const text = document.getElementById('import-paste-text').value.trim();
+  const statusEl = document.getElementById('import-paste-status');
+  if (!text) { setStatus(statusEl, 'err', 'Incolla prima il testo della scheda.'); return; }
+  try {
+    const days = parseSchedaFromText(text);
+    if (!days.length) {
+      setStatus(statusEl, 'err', 'Nessun esercizio trovato. Controlla il formato (serve almeno un\'intestazione di giorno e una lista di esercizi).');
+      return;
+    }
+    applyParsedWorkout(days);
+    setStatus(statusEl, 'ok', `Scheda compilata: ${days.length} giorno/i. Controlla i blocchi e salva.`);
+  } catch(e) {
+    setStatus(statusEl, 'err', 'Errore: ' + e.message);
+  }
+});
+
+document.getElementById('btn-hevy-load-routines').addEventListener('click', async () => {
+  const statusEl = document.getElementById('hevy-import-status');
+  setStatus(statusEl, 'loading', 'Carico routine da Hevy…');
+  try {
+    const data = await hevyFetch('/v1/routines?page=1&pageSize=20');
+    hevyCurrentItems = (data.routines || []).map(r => ({
+      id: r.id,
+      name: r.title || r.name || 'Routine senza nome',
+      meta: `${(r.exercises||[]).length} esercizi`,
+      type: 'routine',
+      raw: r
+    }));
+    renderHevyList();
+    statusEl.style.display = 'none';
+  } catch(e) {
+    setStatus(statusEl, 'err', e.message);
+  }
+});
+
+document.getElementById('btn-hevy-load-workouts').addEventListener('click', async () => {
+  const statusEl = document.getElementById('hevy-import-status');
+  setStatus(statusEl, 'loading', 'Carico allenamenti recenti da Hevy…');
+  try {
+    const data = await hevyFetch('/v1/workouts?page=1&pageSize=15');
+    hevyCurrentItems = (data.workouts || []).map(w => ({
+      id: w.id,
+      name: w.title || w.name || 'Allenamento',
+      meta: new Date(w.start_time || w.createdAt || '').toLocaleDateString('it-IT'),
+      type: 'workout',
+      raw: w
+    }));
+    renderHevyList();
+    statusEl.style.display = 'none';
+  } catch(e) {
+    setStatus(statusEl, 'err', e.message);
+  }
+});
+
+function renderHevyList() {
+  const container = document.getElementById('hevy-list');
+  const itemsEl = document.getElementById('hevy-list-items');
+  itemsEl.innerHTML = '';
+  if (!hevyCurrentItems.length) {
+    itemsEl.innerHTML = '<p style="font-size:.85rem;color:var(--text-muted)">Nessun elemento trovato.</p>';
+    container.style.display = '';
+    return;
+  }
+  hevyCurrentItems.forEach((item, i) => {
+    const div = document.createElement('label');
+    div.className = 'hevy-item';
+    div.innerHTML = `<input type="checkbox" data-hevy-idx="${i}" /><div><div class="hevy-item-name">${escHtml(item.name)}</div><div class="hevy-item-meta">${escHtml(item.meta)}</div></div>`;
+    itemsEl.appendChild(div);
+  });
+  container.style.display = '';
+}
+
+document.getElementById('btn-hevy-import-selected').addEventListener('click', async () => {
+  const statusEl = document.getElementById('hevy-import-status');
+  const checked = document.querySelectorAll('#hevy-list-items input[type=checkbox]:checked');
+  if (!checked.length) { setStatus(statusEl, 'err', 'Seleziona almeno un elemento.'); return; }
+  if (!getCurrentUserId()) { alert('Seleziona un utente prima.'); return; }
+
+  setStatus(statusEl, 'loading', 'Importazione in corso…');
+  try {
+    for (const chk of checked) {
+      const item = hevyCurrentItems[parseInt(chk.dataset.hevyIdx)];
+      const days = convertHevyToDays(item);
+      await createNewSchedaVersion(days, item.name);
+    }
+    await loadWorkout();
+    setStatus(statusEl, 'ok', `${checked.length} scheda/e importata/e da Hevy.`);
+    showToast('Scheda Hevy importata!');
+  } catch(e) {
+    setStatus(statusEl, 'err', 'Errore importazione: ' + e.message);
+  }
+});
+
+function convertHevyToDays(item) {
+  const raw = item.raw;
+  if (item.type === 'routine') {
+    // Routines have exercises directly (single day)
+    const exercises = (raw.exercises || []).map(ex => ({
+      exercise: ex.title || ex.exercise_template_id || '',
+      weight: extractHevyWeight(ex),
+      sets: String((ex.sets || []).length || ''),
+      reps: extractHevyReps(ex),
+      alternative: ''
+    }));
+    return [{ dayNum: 1, name: raw.title || item.name, exercises }];
+  } else {
+    // Workout: group exercises as one day
+    const exercises = (raw.exercises || []).map(ex => ({
+      exercise: ex.title || '',
+      weight: extractHevyWeight(ex),
+      sets: String((ex.sets || []).length || ''),
+      reps: extractHevyReps(ex),
+      alternative: ''
+    }));
+    return [{ dayNum: 1, name: raw.title || item.name, exercises }];
+  }
+}
+
+function extractHevyWeight(ex) {
+  const sets = ex.sets || [];
+  if (!sets.length) return '';
+  const w = sets[0].weight_kg ?? sets[0].weight ?? null;
+  return w !== null && w !== undefined ? String(w) : '';
+}
+
+function extractHevyReps(ex) {
+  const sets = ex.sets || [];
+  if (!sets.length) return '';
+  const reps = sets.map(s => s.reps).filter(Boolean);
+  if (!reps.length) return '';
+  const min = Math.min(...reps); const max = Math.max(...reps);
+  return min === max ? String(min) : `${min}-${max}`;
+}
+
+// ─── Utils ────────────────────────────────────────────────────────────────────
+function escHtml(s) {
+  if (!s) return '';
+  const d = document.createElement('div');
+  d.textContent = String(s);
+  return d.innerHTML;
+}
+
+function setStatus(el, type, msg) {
+  if (!el) return;
+  el.style.display = 'flex';
+  el.className = 'ai-status' + (type==='ok'?' ok':(type==='err'?' err':''));
+  el.innerHTML = type==='loading' ? `<span class="ai-spinner"></span>${escHtml(msg)}` : escHtml(msg);
+}
+
+let toastTimer;
+function showToast(msg) {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;background:var(--accent);color:#0a0a0c;padding:.6rem 1.25rem;border-radius:var(--radius-sm);font-weight:600;font-size:.9rem;z-index:9999;transition:opacity .3s';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toast.style.opacity='0'; }, 2000);
+}
+
+async function reloadAll() {
+  await renderUserList();
+  updateCurrentUserName();
+  await loadProfile();
+  await loadDiet();
+  await loadWorkout();
+  await loadProgress();
+  await loadSettings();
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+openDB()
+  .then(() => migrateFromLocalStorage())
+  .then(() => reloadAll())
+  .catch(err => console.error('DB init error', err));
+</script>
+</body>
+</html>
