@@ -1072,6 +1072,29 @@
       <h1>Impostazioni</h1>
       <p class="sub">Configurazione dell'app e integrazioni.</p>
 
+      <!-- Backup / Ripristino -->
+      <div class="card">
+        <h2>Backup & Ripristino dati</h2>
+        <p class="settings-hint">I dati sono salvati localmente nel browser. Usa il backup per non perderli se cambi dispositivo, cancelli la cache o vuoi spostarti su iPhone.</p>
+        <div class="flex-gap" style="margin-bottom:1rem">
+          <button type="button" id="btn-export-backup" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Esporta backup (.json)
+          </button>
+          <label class="btn btn-secondary" style="cursor:pointer;margin-bottom:0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Importa backup
+            <input type="file" id="input-import-backup" accept=".json" style="display:none" />
+          </label>
+        </div>
+        <div id="backup-status" class="ai-status" style="display:none"></div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:.82rem;color:var(--text-muted);line-height:1.6">
+          <strong style="color:var(--text);display:block;margin-bottom:.3rem">Come funziona</strong>
+          <b>Esporta</b> — scarica un file <code style="background:var(--surface);padding:.1rem .35rem;border-radius:4px">robcoach-backup.json</code> con tutti i tuoi dati (utenti, profilo, schede, diete, progressi).<br>
+          <b>Importa</b> — carica un backup precedente. I dati esistenti vengono <em>uniti</em> (non cancellati), quindi puoi passare da PC a iPhone senza perdere nulla.
+        </div>
+      </div>
+
       <!-- AI Provider (ready for future implementation) -->
       <div class="card">
         <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap">
@@ -3521,6 +3544,58 @@ async function reloadAll() {
   await loadProgress();
   await loadSettings();
 }
+
+// ─── Backup / Restore ─────────────────────────────────────────────────────────
+async function exportBackup() {
+  const stores = ['users','profiles','schede','diete','progress'];
+  const data = { _version: 1, _exported: new Date().toISOString(), stores: {} };
+  for (const s of stores) {
+    try { data.stores[s] = await idbGetAll(s); } catch { data.stores[s] = []; }
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const date = new Date().toISOString().slice(0,10);
+  a.href = url; a.download = `robcoach-backup-${date}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  showBackupStatus('ok', 'Backup esportato correttamente!');
+}
+
+async function importBackup(file) {
+  const statusEl = document.getElementById('backup-status');
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!data.stores) throw new Error('File non valido — non è un backup RobCoach.');
+    const stores = ['users','profiles','schede','diete','progress'];
+    let count = 0;
+    for (const s of stores) {
+      const rows = data.stores[s] || [];
+      for (const row of rows) {
+        try { await idbPut(s, row); count++; } catch { /* skip duplicates */ }
+      }
+    }
+    showBackupStatus('ok', `Importati ${count} record. Ricarico l'app…`);
+    setTimeout(() => { reloadAll(); navigate('users'); }, 1200);
+  } catch (err) {
+    showBackupStatus('err', 'Errore: ' + err.message);
+  }
+}
+
+function showBackupStatus(type, msg) {
+  const el = document.getElementById('backup-status');
+  if (!el) return;
+  el.style.display = 'flex';
+  el.className = 'ai-status ' + type;
+  el.textContent = msg;
+  if (type === 'ok') setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+document.getElementById('btn-export-backup')?.addEventListener('click', exportBackup);
+document.getElementById('input-import-backup')?.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (file) { importBackup(file); e.target.value = ''; }
+});
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 openDB()
